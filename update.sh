@@ -746,7 +746,8 @@ update_geoip() {
 
 set_my_config() {
     # 添加其他NSS/12M大内核及daed适配等其他优化
-    chmod +x $BASE_PATH/patches/function.sh && $BASE_PATH/patches/function.sh "$BUILD_DIR"
+    echo "test"
+    # chmod +x $BASE_PATH/patches/function.sh && $BASE_PATH/patches/function.sh "$BUILD_DIR"
 }
 
 main() {
