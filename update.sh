@@ -24,7 +24,7 @@ FEEDS_CONF="feeds.conf.default"
 GOLANG_REPO="https://github.com/sbwml/packages_lang_golang"
 GOLANG_BRANCH="24.x"
 THEME_SET="argon"
-LAN_ADDR="192.168.1.1"
+LAN_ADDR="10.0.10.1"
 
 clone_repo() {
     if [[ ! -d $BUILD_DIR ]]; then
@@ -153,9 +153,9 @@ install_small8() {
         luci-app-passwall alist luci-app-alist smartdns luci-app-smartdns v2dat mosdns luci-app-mosdns \
         adguardhome luci-app-adguardhome ddns-go luci-app-ddns-go taskd luci-lib-xterm luci-lib-taskd \
         luci-app-store quickstart luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest \
-        luci-theme-argon netdata luci-app-netdata lucky luci-app-lucky luci-app-openclash luci-app-homeproxy \
+        netdata luci-app-netdata lucky luci-app-lucky luci-app-openclash luci-app-homeproxy \
         luci-app-amlogic nikki luci-app-nikki tailscale luci-app-tailscale oaf open-app-filter luci-app-oaf \
-        easytier luci-app-easytier msd_lite luci-app-msd_lite
+        luci-theme-argon luci-theme-argon-config easytier luci-app-easytier nps luci-app-npc msd_lite luci-app-msd_lite
 }
 
 install_feeds() {
@@ -744,6 +744,11 @@ update_geoip() {
     fi
 }
 
+set_my_config() {
+    # 添加其他NSS/12M大内核及daed适配等其他优化
+    chmod +x $BASE_PATH/patches/function.sh && $BASE_PATH/patches/function.sh "$BUILD_DIR"
+}
+
 main() {
     clone_repo
     clean_up
@@ -783,6 +788,7 @@ main() {
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
+    set_my_config
     install_feeds
     support_fw4_adg
     update_script_priority
@@ -790,6 +796,7 @@ main() {
     update_geoip
     # update_proxy_app_menu_location
     # update_dns_app_menu_location
+
 }
 
 main "$@"

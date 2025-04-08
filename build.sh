@@ -39,7 +39,7 @@ fi
 
 $BASE_PATH/update.sh "$REPO_URL" "$REPO_BRANCH" "$BASE_PATH/$BUILD_DIR" "$COMMIT_HASH"
 
-\cp -f "$CONFIG_FILE" "$BASE_PATH/$BUILD_DIR/.config"
+cat "$CONFIG_FILE" >> "$BASE_PATH/$BUILD_DIR/.config"
 
 cd "$BASE_PATH/$BUILD_DIR"
 make defconfig
