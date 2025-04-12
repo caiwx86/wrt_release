@@ -1,5 +1,7 @@
 #!/bin/bash
 
+config_file=".config"
+
 BASE_PATH=$1
 if [[ -d $BASE_PATH ]]; then
    cd $BASE_PATH
@@ -128,7 +130,6 @@ EOF
 
 function generate_config() {
   echo "执行generate_config()"
-  config_file=".config"
   #配置文件不存在
   if [[ ! -f $config_file ]]; then
       echo $config_file 文件不存在
