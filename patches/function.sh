@@ -137,6 +137,7 @@ function generate_config() {
       exit
   else
       touch $config_file
+      echo "# function.sh ..." >> $config_file
   fi
 
   #默认机型为ipq60xx
