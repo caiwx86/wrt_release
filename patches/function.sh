@@ -196,7 +196,7 @@ function set_theme() {
   git_sparse_clone openwrt-24.10 https://github.com/sbwml/luci-theme-argon \
      luci-app-argon-config luci-theme-argon 
 
-  argon_css_file=$(find package/luci-theme-argon/ -type f -name "cascade.css")
+  argon_css_file=$(find ./feeds/my-apps/luci-theme-argon/ -type f -name "cascade.css")
   #修改字体
   sed -i "/^.main .main-left .nav li a {/,/^}/ { /font-weight: bolder/d }" $argon_css_file
   sed -i '/^\[data-page="admin-system-opkg"\] #maincontent>.container {/,/}/ s/font-weight: 600;/font-weight: normal;/' $argon_css_file
