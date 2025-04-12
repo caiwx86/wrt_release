@@ -1,6 +1,7 @@
 #!/bin/bash
 
 config_file=".config"
+custom_feeds="feeds/my-apps"
 
 BASE_PATH=$1
 if [[ -d $BASE_PATH ]]; then
@@ -160,7 +161,7 @@ function git_sparse_clone() {
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
   cd $repodir && git sparse-checkout set $@
-  my_feeds="../feeds/my-apps"
+  my_feeds="../$custom_feeds"
   if [[ ! -d "$my_feeds" ]]; then
      mkdir -p "$my_feeds" 
   fi
@@ -196,7 +197,7 @@ function set_theme() {
   git_sparse_clone openwrt-24.10 https://github.com/sbwml/luci-theme-argon \
      luci-app-argon-config luci-theme-argon 
 
-  argon_css_file=$(find ./feeds/my-apps/luci-theme-argon/ -type f -name "cascade.css")
+  argon_css_file=$(find ./$custom_feeds/luci-theme-argon/ -type f -name "cascade.css")
   #修改字体
   sed -i "/^.main .main-left .nav li a {/,/^}/ { /font-weight: bolder/d }" $argon_css_file
   sed -i '/^\[data-page="admin-system-opkg"\] #maincontent>.container {/,/}/ s/font-weight: 600;/font-weight: normal;/' $argon_css_file
