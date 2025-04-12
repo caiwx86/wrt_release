@@ -744,11 +744,6 @@ update_geoip() {
     fi
 }
 
-set_my_config() {
-    # 添加其他NSS/12M大内核及daed适配等其他优化
-    chmod +x $BASE_PATH/patches/function.sh && $BASE_PATH/patches/function.sh "$BUILD_DIR"
-}
-
 main() {
     clone_repo
     clean_up
@@ -788,7 +783,6 @@ main() {
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
-    set_my_config
     install_feeds
     support_fw4_adg
     update_script_priority
