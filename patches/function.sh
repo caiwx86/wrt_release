@@ -1,7 +1,6 @@
 #!/bin/bash
 
 config_file=".config"
-custom_feeds="feeds/my-apps"
 
 BASE_PATH=$1
 if [[ -d $BASE_PATH ]]; then
@@ -162,11 +161,7 @@ function git_sparse_clone() {
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
   cd $repodir && git sparse-checkout set $@
-  my_feeds="../$custom_feeds"
-  if [[ ! -d "$my_feeds" ]]; then
-     mkdir -p "$my_feeds" 
-  fi
-  mv -f $@ $my_feeds
+  mv -f $@ ../package 
   cd .. && rm -rf $repodir
 }
 
