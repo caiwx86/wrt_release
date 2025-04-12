@@ -133,6 +133,8 @@ function generate_config() {
   if [[ ! -f $config_file ]]; then
       echo $config_file 文件不存在
       exit
+  else
+      touch $config_file
   fi
 
   #默认机型为ipq60xx
