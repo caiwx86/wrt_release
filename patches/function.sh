@@ -160,7 +160,11 @@ function git_sparse_clone() {
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
   cd $repodir && git sparse-checkout set $@
-  mv -f $@ ../package
+  my_feeds="../feeds/my-apps"
+  if [[ ! -d "$my_feeds" ]]; then
+     mkdir -p "$my_feeds" 
+  fi
+  mv -f $@ $my_feeds
   cd .. && rm -rf $repodir
 }
 
@@ -182,9 +186,9 @@ function add_daed() {
       daed luci-app-daed
 
   # 解决luci-app-daed 依赖问题
-  if [[ ! -d "package/libcron" ]]; then
-      mkdir -p package/libcron && wget -O package/libcron/Makefile https://raw.githubusercontent.com/immortalwrt/packages/refs/heads/master/libs/libcron/Makefile
-  fi
+  # if [[ ! -d "package/libcron" ]]; then
+  #    mkdir -p package/libcron && wget -O package/libcron/Makefile https://raw.githubusercontent.com/immortalwrt/packages/refs/heads/master/libs/libcron/Makefile
+  #fi
 }
 
 function set_theme() {

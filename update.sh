@@ -100,7 +100,7 @@ remove_unwanted_packages() {
         "msd_lite"
     )
     local small8_packages=(
-        "ppp" "firewall" "dae" "daed-next" "libnftnl" "nftables" "dnsmasq"
+        "ppp" "firewall" "dae" "daed" "daed-next" "libnftnl" "nftables" "dnsmasq"
     )
 
     for pkg in "${luci_packages[@]}"; do
@@ -155,8 +155,7 @@ install_small8() {
         luci-app-store quickstart luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest \
         netdata luci-app-netdata lucky luci-app-lucky luci-app-openclash luci-app-homeproxy \
         luci-app-amlogic nikki luci-app-nikki tailscale luci-app-tailscale oaf open-app-filter luci-app-oaf \
-        luci-theme-argon luci-theme-argon-config easytier luci-app-easytier nps luci-app-npc msd_lite luci-app-msd_lite \
-        daed luci-app-daed 
+        luci-theme-argon luci-theme-argon-config easytier luci-app-easytier nps luci-app-npc msd_lite luci-app-msd_lite
 }
 
 install_feeds() {
