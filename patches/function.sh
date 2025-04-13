@@ -199,7 +199,13 @@ function set_theme() {
   sed -i '/^\[data-page="admin-system-opkg"\] #maincontent>.container {/,/}/ s/font-weight: 600;/font-weight: normal;/' $argon_css_file
 }
 
+function add_nps() {
+  git_sparse_clone main https://github.com/djylb/nps-openwrt \
+      npc luci-app-npc
+}
+
 # 主要执行程序
 add_daed
 set_theme
+add_nps
 generate_config && cat $config_file
