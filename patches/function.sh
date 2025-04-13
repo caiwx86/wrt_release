@@ -207,5 +207,5 @@ function add_nps() {
 # 主要执行程序
 add_daed
 set_theme
-add_nps
+# add_nps
 generate_config && cat $config_file
