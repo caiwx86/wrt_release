@@ -213,10 +213,16 @@ function add_frp() {
   git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
       frp luci-app-frpc
 }
+
+function add_netdata() {
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      netdata luci-app-netdata
+}
 # 主要执行程序
 add_daed
 set_theme
 add_nps
 add_onliner
 add_frp
+add_netdata
 generate_config && cat $config_file
