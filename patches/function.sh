@@ -230,5 +230,5 @@ add_nps
 add_cpufreq
 # add_onliner
 # add_frp
-# add_netdata
+add_netdata
 generate_config && cat $config_file
