@@ -218,10 +218,16 @@ function add_netdata() {
   git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
       netdata luci-app-netdata
 }
+
+function add_cpufreq() {
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      cpufreq luci-app-cpufreq
+}
 # 主要执行程序
 add_daed
 set_theme
 add_nps
+add_cpufreq
 # add_onliner
 # add_frp
 # add_netdata
