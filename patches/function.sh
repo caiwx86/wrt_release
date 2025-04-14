@@ -223,6 +223,6 @@ add_daed
 set_theme
 add_nps
 # add_onliner
-add_frp
+# add_frp
 # add_netdata
 generate_config && cat $config_file
