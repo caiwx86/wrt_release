@@ -200,12 +200,23 @@ function set_theme() {
 }
 
 function add_nps() {
-  git_sparse_clone main https://github.com/djylb/nps-openwrt \
-      npc luci-app-npc
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      nps luci-app-npc
 }
 
+function add_onliner() {
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      luci-app-onliner
+}
+
+function add_frp() {
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      frp luci-app-frpc
+}
 # 主要执行程序
 add_daed
 set_theme
-# add_nps
+add_nps
+add_onliner
+add_frp
 generate_config && cat $config_file
