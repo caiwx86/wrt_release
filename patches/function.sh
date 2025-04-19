@@ -204,31 +204,8 @@ function add_nps() {
       nps luci-app-npc
 }
 
-function add_onliner() {
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      luci-app-onliner
-}
-
-function add_frp() {
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      frp luci-app-frpc
-}
-
-function add_netdata() {
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      netdata luci-app-netdata
-}
-
-function add_cpufreq() {
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      cpufreq luci-app-cpufreq
-}
 # 主要执行程序
 add_daed
 set_theme
 add_nps
-add_cpufreq
-# add_onliner
-# add_frp
-# add_netdata
 generate_config && cat $config_file
