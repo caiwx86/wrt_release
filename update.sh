@@ -122,17 +122,9 @@ remove_unwanted_packages() {
         \rm -rf ./package/istore
     fi
 
+    # ipq60xx不支持NSS offload mnet_rx
     if grep -q "nss_packages" "$BUILD_DIR/$FEEDS_CONF"; then
-        local nss_packages_dirs=(
-            "$BUILD_DIR/feeds/luci/protocols/luci-proto-quectel"
-            "$BUILD_DIR/feeds/packages/net/quectel-cm"
-            "$BUILD_DIR/feeds/packages/kernel/quectel-qmi-wwan"
-        )
-        for dir in "${nss_packages_dirs[@]}"; do
-            if [[ -d "$dir" ]]; then
-                \rm -rf "$dir"
-            fi
-        done
+        rm -rf "$BUILD_DIR/feeds/nss_packages/wwan"
     fi
 
     # 临时放一下，清理脚本
@@ -186,7 +178,7 @@ fix_default_set() {
     fi
 
     install -Dm755 "$BASE_PATH/patches/990_set_argon_primary" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/990_set_argon_primary"
-    install -Dm755 "$BASE_PATH/patches/991_set_nf_conntrack_max" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/991_set_nf_conntrack_max"
+    install -Dm755 "$BASE_PATH/patches/991_custom_settings" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/991_custom_settings"
 
     if [ -f "$BUILD_DIR/package/emortal/autocore/files/tempinfo" ]; then
         if [ -f "$BASE_PATH/patches/tempinfo" ]; then
@@ -273,6 +265,7 @@ remove_something_nss_kmod() {
         sed -i '/kmod-qca-nss-drv-wifi-meshmgr/d' $ipq_mk_path
         sed -i '/kmod-qca-nss-macsec/d' $ipq_mk_path
 
+        sed -i 's/automount //g' $ipq_mk_path
         sed -i 's/cpufreq //g' $ipq_mk_path
     fi
 }
@@ -522,7 +515,7 @@ update_package() {
         if [ -z $PKG_REPO ]; then
             return 0
         fi
-        local PKG_VER=$(curl -sL "https://api.github.com/repos/$PKG_REPO/releases" | jq -r "map(select(.prerelease|not)) | first | .tag_name")
+        local PKG_VER=$(curl -sL "https://api.github.com/repos/$PKG_REPO/releases" | jq -r "map(select(.prerelease == true)) | first | .tag_name")
         PKG_VER=$(echo $PKG_VER | grep -oE "[\.0-9]{1,}")
 
         local PKG_NAME=$(awk -F"=" '/PKG_NAME:=/ {print $NF}' $mk_path | grep -oE "[-_:/\$\(\)\?\.a-zA-Z0-9]{1,}")
@@ -791,6 +784,7 @@ main() {
     update_script_priority
     fix_easytier
     update_geoip
+    update_package "xray-core"
     # update_proxy_app_menu_location
     # update_dns_app_menu_location
 }
