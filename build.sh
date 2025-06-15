@@ -42,7 +42,7 @@ $BASE_PATH/update.sh "$REPO_URL" "$REPO_BRANCH" "$BASE_PATH/$BUILD_DIR" "$COMMIT
 \cp -f "$CONFIG_FILE" "$BASE_PATH/$BUILD_DIR/.config"
 
 # 添加其他NSS/12M大内核及daed适配等其他优化
-chmod +x $BASE_PATH/patches/function.sh && $BASE_PATH/patches/function.sh "$BASE_PATH/$BUILD_DIR"
+chmod +x $BASE_PATH/patches/custom/function.sh && $BASE_PATH/patches/custom/function.sh "$BASE_PATH/$BUILD_DIR"
 cat "$BASE_PATH/$BUILD_DIR/.config"
 
 cd "$BASE_PATH/$BUILD_DIR"

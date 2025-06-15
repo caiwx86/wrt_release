@@ -11,6 +11,7 @@ libwrt-k612/
 compilecfg/test.ini
 deconfig/test.config
 *.swp
+.DS_Store
 .vscode/settings.json
 deconfig/*.bak
 test.sh

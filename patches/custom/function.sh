@@ -222,10 +222,40 @@ function add_netdata() {
   echo "CONFIG_PACKAGE_luci-app-netdata=y" >> $config_file
 }
 
+function add_other_package() {
+  echo "添加其他通插件"
+  # add other package
+  #impitool
+  echo "CONFIG_PACKAGE_ipmitool=y" >> $config_file
+  # jq
+  echo "CONFIG_PACKAGE_jq=y" >> $config_file
+
+}
+
+function add_adguardhome() {
+  if [[ ! -d "files/usr/bin" ]]; then
+    mkdir -p files/usr/bin
+  fi
+  # 复制AdGuardHome相关文件
+  echo "添加AdGuardHome相关文件"
+  cp $GITHUB_WORKSPACE/patches/custom/adguard_update_dhcp_leases.sh files/usr/bin/adguard_update_dhcp_leases.sh
+}
+
+function add_defaults_settings() {
+  # 添加默认设置脚本
+  if [[ ! -d "files/etc/uci-defaults" ]]; then
+    mkdir -p files/etc/uci-defaults
+  fi
+  cp $GITHUB_WORKSPACE/patches/custom/init-settings.sh files/etc/uci-defaults/99-init-settings
+}
+
 # 主要执行程序
 add_daed
 set_theme
 add_nps
 add_watchdog
 add_netdata
+add_adguardhome
+add_other_package
+add_defaults_settings
 generate_config && cat $config_file
