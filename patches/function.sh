@@ -197,6 +197,11 @@ function set_theme() {
   #修改字体
   sed -i "/^.main .main-left .nav li a {/,/^}/ { /font-weight: bolder/d }" $argon_css_file
   sed -i '/^\[data-page="admin-system-opkg"\] #maincontent>.container {/,/}/ s/font-weight: 600;/font-weight: normal;/' $argon_css_file
+
+  if [ -d "package/luci-theme-argon" ]; then
+     find "package/luci-theme-argon" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
+  fi
+
 }
 
 function add_nps() {
