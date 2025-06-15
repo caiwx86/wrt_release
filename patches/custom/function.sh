@@ -167,7 +167,7 @@ function git_sparse_clone() {
 function remove_package() {
    packages="$@"
    for package in $packages; do 
-      pkg_path=$(find . -name "$package")
+      pkg_path=$(find . -type d -name "$package")
       if [[ ! "$pkg_path" == "" ]]; then
          rm -rvf $pkg_path
       fi
@@ -204,8 +204,9 @@ function set_theme() {
 }
 
 function add_nps() {
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      nps luci-app-npc
+  remove_package nps npc luci-app-nps luci-app-npc
+  git_sparse_clone main https://github.com/djylb/nps-openwrt \
+      npc luci-app-npc
 }
 
 function add_watchdog() {
