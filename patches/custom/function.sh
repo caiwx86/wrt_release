@@ -255,7 +255,7 @@ add_daed
 set_theme
 add_nps
 add_watchdog
-add_netdata
+# add_netdata
 add_adguardhome
 add_other_package
 add_defaults_settings
