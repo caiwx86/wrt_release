@@ -74,11 +74,11 @@ update_feeds() {
     fi
 
     # 切换nss-packages源
-    if grep -q "nss_packages" "$BUILD_DIR/$FEEDS_CONF"; then
-        sed -i '/nss_packages/d' "$BUILD_DIR/$FEEDS_CONF"
-        [ -z "$(tail -c 1 "$BUILD_DIR/$FEEDS_CONF")" ] || echo "" >>"$BUILD_DIR/$FEEDS_CONF"
-        echo "src-git nss_packages https://github.com/LiBwrt/nss-packages.git" >>"$BUILD_DIR/$FEEDS_CONF"
-    fi
+    # if grep -q "nss_packages" "$BUILD_DIR/$FEEDS_CONF"; then
+    #     sed -i '/nss_packages/d' "$BUILD_DIR/$FEEDS_CONF"
+    #     [ -z "$(tail -c 1 "$BUILD_DIR/$FEEDS_CONF")" ] || echo "" >>"$BUILD_DIR/$FEEDS_CONF"
+    #     echo "src-git nss_packages https://github.com/LiBwrt/nss-packages.git" >>"$BUILD_DIR/$FEEDS_CONF"
+    # fi
 
     # 更新 feeds
     ./scripts/feeds clean
@@ -101,22 +101,39 @@ remove_unwanted_packages() {
         "shadowsocksr-libev" "dae" "daed" "mihomo" "geoview" "tailscale" "open-app-filter"
         "msd_lite" "netdata" "frp"
     )
+    local packages_utils=(
+        "cups"
+    )
     local small8_packages=(
         "ppp" "firewall" "dae" "daed" "daed-next" "libnftnl" "nftables" "dnsmasq"
     )
 
     for pkg in "${luci_packages[@]}"; do
-        \rm -rf ./feeds/luci/applications/$pkg
-        \rm -rf ./feeds/luci/themes/$pkg
+        if [[ -d ./feeds/luci/applications/$pkg ]]; then
+            \rm -rf ./feeds/luci/applications/$pkg
+        fi
+        if [[ -d ./feeds/luci/themes/$pkg ]]; then
+            \rm -rf ./feeds/luci/themes/$pkg
+        fi
     done
 
     for pkg in "${packages_net[@]}"; do
-        \rm -rf ./feeds/packages/net/$pkg
-        \rm -rf ./feeds/packages/admin/$pkg
+        if [[ -d ./feeds/packages/net/$pkg ]]; then
+            \rm -rf ./feeds/packages/net/$pkg
+            \rm -rf ./feeds/packages/admin/$pkg
+        fi
+    done
+
+    for pkg in "${packages_utils[@]}"; do
+        if [[ -d ./feeds/packages/utils/$pkg ]]; then
+            \rm -rf ./feeds/packages/utils/$pkg
+        fi
     done
 
     for pkg in "${small8_packages[@]}"; do
-        \rm -rf ./feeds/small8/$pkg
+        if [[ -d ./feeds/small8/$pkg ]]; then
+            \rm -rf ./feeds/small8/$pkg
+        fi
     done
 
     if [[ -d ./package/istore ]]; then
@@ -124,9 +141,9 @@ remove_unwanted_packages() {
     fi
 
     # ipq60xx不支持NSS offload mnet_rx
-    if grep -q "nss_packages" "$BUILD_DIR/$FEEDS_CONF"; then
-        rm -rf "$BUILD_DIR/feeds/nss_packages/wwan"
-    fi
+    # if grep -q "nss_packages" "$BUILD_DIR/$FEEDS_CONF"; then
+    #     rm -rf "$BUILD_DIR/feeds/nss_packages/wwan"
+    # fi
 
     # 临时放一下，清理脚本
     if [ -d "$BUILD_DIR/target/linux/qualcommax/base-files/etc/uci-defaults" ]; then
@@ -150,7 +167,7 @@ install_small8() {
         luci-app-store quickstart luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest \
         netdata luci-app-netdata lucky luci-app-lucky homebox luci-app-netspeedtest \
         luci-app-amlogic nikki luci-app-nikki tailscale luci-app-tailscale oaf open-app-filter luci-app-oaf \
-        luci-theme-argon luci-theme-argon-config easytier luci-app-easytier msd_lite luci-app-msd_lite
+        luci-theme-argon luci-theme-argon-config easytier luci-app-easytier msd_lite luci-app-msd_lite cups luci-app-cupsd
 }
 
 install_feeds() {
@@ -503,25 +520,43 @@ update_dnsmasq_conf() {
 # 更新版本
 update_package() {
     local dir=$(find "$BUILD_DIR/package" \( -type d -o -type l \) -name $1)
-    if [ -z $dir ]; then
+    if [ -z "$dir" ]; then
         return 0
+    fi
+    local branch=$2
+    if [ -z "$branch" ]; then
+        branch="releases"
     fi
     local mk_path="$dir/Makefile"
     if [ -f "$mk_path" ]; then
         # 提取repo
-        local PKG_REPO=$(grep -oE "^PKG_SOURCE_URL.*github.com(/[-_a-zA-Z0-9]{1,}){2}" $mk_path | awk -F"/" '{print $(NF - 1) "/" $NF}')
-        if [ -z $PKG_REPO ]; then
-            return 0
+        local PKG_REPO=$(grep -oE "^PKG_GIT_URL.*github.com(/[-_a-zA-Z0-9]{1,}){2}" $mk_path | awk -F"/" '{print $(NF - 1) "/" $NF}')
+        if [ -z "$PKG_REPO" ]; then
+            PKG_REPO=$(grep -oE "^PKG_SOURCE_URL.*github.com(/[-_a-zA-Z0-9]{1,}){2}" $mk_path | awk -F"/" '{print $(NF - 1) "/" $NF}')
+            if [ -z "$PKG_REPO" ]; then
+                return 0
+            fi
         fi
-        local PKG_VER=$(curl -sL "https://api.github.com/repos/$PKG_REPO/releases" | jq -r '.[0].tag_name')
+        local PKG_VER=$(curl -sL "https://api.github.com/repos/$PKG_REPO/$branch" | jq -r '.[0] | .tag_name // .name')
+        if [ -n "$3" ]; then
+            PKG_VER=$3
+        fi
+        local COMMIT_SHA=$(curl -sL "https://api.github.com/repos/$PKG_REPO/tags" | jq -r '.[] | select(.name=="'$PKG_VER'") | .commit.sha' | cut -c1-7)
+        if [ -n "$COMMIT_SHA" ]; then
+            sed -i 's/^PKG_GIT_SHORT_COMMIT:=.*/PKG_GIT_SHORT_COMMIT:='$COMMIT_SHA'/g' $mk_path
+        fi
         PKG_VER=$(echo $PKG_VER | grep -oE "[\.0-9]{1,}")
 
         local PKG_NAME=$(awk -F"=" '/PKG_NAME:=/ {print $NF}' $mk_path | grep -oE "[-_:/\$\(\)\?\.a-zA-Z0-9]{1,}")
         local PKG_SOURCE=$(awk -F"=" '/PKG_SOURCE:=/ {print $NF}' $mk_path | grep -oE "[-_:/\$\(\)\?\.a-zA-Z0-9]{1,}")
-        local PKG_SOURCE_URL=$(awk -F"=" '/PKG_SOURCE_URL:=/ {print $NF}' $mk_path | grep -oE "[-_:/\$\(\)\?\.a-zA-Z0-9]{1,}")
+        local PKG_SOURCE_URL=$(awk -F"=" '/PKG_SOURCE_URL:=/ {print $NF}' $mk_path | grep -oE "[-_:/\$\(\)\{\}\?\.a-zA-Z0-9]{1,}")
+        local PKG_GIT_URL=$(awk -F"=" '/PKG_GIT_URL:=/ {print $NF}' $mk_path)
+        local PKG_GIT_REF=$(awk -F"=" '/PKG_GIT_REF:=/ {print $NF}' $mk_path)
 
+        PKG_SOURCE_URL=${PKG_SOURCE_URL//\$\(PKG_GIT_URL\)/$PKG_GIT_URL}
+        PKG_SOURCE_URL=${PKG_SOURCE_URL//\$\(PKG_GIT_REF\)/$PKG_GIT_REF}
         PKG_SOURCE_URL=${PKG_SOURCE_URL//\$\(PKG_NAME\)/$PKG_NAME}
-        PKG_SOURCE_URL=${PKG_SOURCE_URL//\$\(PKG_VERSION\)/$PKG_VER}
+        PKG_SOURCE_URL=$(echo "$PKG_SOURCE_URL" | sed "s/\${PKG_VERSION}/$PKG_VER/g; s/\$(PKG_VERSION)/$PKG_VER/g")
         PKG_SOURCE=${PKG_SOURCE//\$\(PKG_NAME\)/$PKG_NAME}
         PKG_SOURCE=${PKG_SOURCE//\$\(PKG_VERSION\)/$PKG_VER}
 
@@ -668,7 +703,7 @@ update_proxy_app_menu_location() {
     local passwall_path="$BUILD_DIR/package/feeds/small8/luci-app-passwall/luasrc/controller/passwall.lua"
     if [ -d "${passwall_path%/*}" ] && [ -f "$passwall_path" ]; then
         local pos=$(grep -n "entry" "$passwall_path" | head -n 1 | awk -F ":" '{print $1}')
-        if [ -n $pos ]; then
+        if [ -n "$pos" ]; then
             sed -i ''${pos}'i\	entry({"admin", "proxy"}, firstchild(), "Proxy", 30).dependent = false' "$passwall_path"
             sed -i 's/"services"/"proxy"/g' "$passwall_path"
         fi
@@ -692,7 +727,7 @@ update_dns_app_menu_location() {
     local smartdns_path="$BUILD_DIR/package/feeds/small8/luci-app-smartdns/luasrc/controller/smartdns.lua"
     if [ -d "${smartdns_path%/*}" ] && [ -f "$smartdns_path" ]; then
         local pos=$(grep -n "entry" "$smartdns_path" | head -n 1 | awk -F ":" '{print $1}')
-        if [ -n $pos ]; then
+        if [ -n "$pos" ]; then
             sed -i ''${pos}'i\	entry({"admin", "dns"}, firstchild(), "DNS", 29).dependent = false' "$smartdns_path"
             sed -i 's/"services"/"dns"/g' "$smartdns_path"
         fi
@@ -747,6 +782,23 @@ update_lucky() {
     fi
 }
 
+fix_rust_compile_error() {
+    if [ -f "$BUILD_DIR/feeds/packages/lang/rust/Makefile" ]; then
+        sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$BUILD_DIR/feeds/packages/lang/rust/Makefile"
+    fi
+}
+
+update_smartdns_luci() {
+    if [ -d "$BUILD_DIR/feeds/small8/luci-app-smartdns" ]; then
+        rm -rf "$BUILD_DIR/feeds/small8/luci-app-smartdns"
+    fi
+    git clone --depth 1 -b master https://github.com/pymumu/luci-app-smartdns.git "$BUILD_DIR/feeds/small8/luci-app-smartdns"
+
+    if [ -f "$BUILD_DIR/feeds/small8/luci-app-smartdns/Makefile" ]; then
+        sed -i 's/\.\.\/\.\.\/luci\.mk/\$(TOPDIR)\/feeds\/luci\/luci\.mk/g' "$BUILD_DIR/feeds/small8/luci-app-smartdns/Makefile"
+    fi
+}
+
 main() {
     clone_repo
     clean_up
@@ -787,12 +839,18 @@ main() {
     add_timecontrol
     add_gecoosac
     update_lucky
+    fix_rust_compile_error
+    update_smartdns_luci
     install_feeds
     support_fw4_adg
     update_script_priority
     fix_easytier
     update_geoip
-    update_package "xray-core"
+    update_package "runc" "releases" "v1.2.6"
+    update_package "containerd" "releases" "v1.7.27"
+    update_package "docker" "tags" "v28.2.2"
+    update_package "dockerd" "releases" "v28.2.2"
+    # update_package "xray-core"
     # update_proxy_app_menu_location
     # update_dns_app_menu_location
 }
