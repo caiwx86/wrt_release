@@ -135,7 +135,6 @@ function generate_config() {
       echo $config_file 文件不存在
       exit
   else
-      touch $config_file
       echo "# function.sh ..." >> $config_file
   fi
 
