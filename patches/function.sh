@@ -208,8 +208,24 @@ function add_nps() {
       nps luci-app-npc
 }
 
+function add_watchdog() {
+  # 添加额外插件
+  git clone https://github.com/sirpdboy/luci-app-watchdog package/watchdog
+  echo "CONFIG_PACKAGE_luci-app-watchdog=y" >> $config_file
+}
+
+function add_netdata() {
+  remove_package luci-app-netdata
+  # 添加额外插件
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      luci-app-netdata
+  echo "CONFIG_PACKAGE_luci-app-netdata=y" >> $config_file
+}
+
 # 主要执行程序
 add_daed
 set_theme
 add_nps
+add_watchdog
+add_netdata
 generate_config && cat $config_file
