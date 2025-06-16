@@ -211,7 +211,8 @@ function add_nps() {
 
 function add_watchdog() {
   # 添加额外插件
-  git clone https://github.com/sirpdboy/luci-app-watchdog package/watchdog
+  git_sparse_clone main https://github.com/sirpdboy/luci-app-watchdog \
+      watchdog luci-app-watchdog 
   echo "CONFIG_PACKAGE_luci-app-watchdog=y" >> $config_file
 }
 
