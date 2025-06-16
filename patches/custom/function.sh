@@ -266,6 +266,13 @@ function add_geodata() {
   echo "CONFIG_PACKAGE_v2ray-geodata=y" >> $config_file
 }
 
+function add_mosdns() {
+  remove_package mosdns luci-app-mosdns v2dat
+  git_sparse_clone v5 https://github.com/sbwml/luci-app-mosdns \
+      mosdns luci-app-mosdns v2dat
+  echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -273,6 +280,7 @@ add_dae
 add_daed
 add_watchdog
 add_geodata
+add_mosdns
 # add_netdata
 add_adguardhome
 add_other_package
