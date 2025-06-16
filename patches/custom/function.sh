@@ -267,6 +267,8 @@ function add_geodata() {
 }
 
 # 主要执行程序
+# 解决配置文件未换行问题
+echo "" >> $config_file
 add_dae
 add_daed
 add_watchdog
