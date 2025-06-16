@@ -278,6 +278,8 @@ function add_mosdns() {
 echo "" >> $config_file
 add_dae
 add_daed
+set_theme
+add_nps
 add_watchdog
 add_geodata
 add_mosdns
