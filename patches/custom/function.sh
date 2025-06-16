@@ -230,7 +230,8 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_ipmitool=y" >> $config_file
   # jq
   echo "CONFIG_PACKAGE_jq=y" >> $config_file
-
+  # gdisk
+  echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
 }
 
 function add_adguardhome() {
