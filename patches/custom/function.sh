@@ -276,11 +276,11 @@ function add_mosdns() {
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
-add_dae
+# add_dae
 add_daed
 set_theme
 add_nps
-add_watchdog
+# add_watchdog
 add_geodata
 add_mosdns
 # add_netdata
