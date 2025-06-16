@@ -252,11 +252,25 @@ function add_defaults_settings() {
   cp $GITHUB_WORKSPACE/patches/custom/init-settings.sh files/etc/uci-defaults/99-init-settings
 }
 
+function add_dae() {
+  remove_package dae luci-app-dae
+  cp -rv $GITHUB_WORKSPACE/patches/custom/package/dae ./package/
+  cp -rv $GITHUB_WORKSPACE/patches/custom/package/luci-app-dae ./package/
+  echo "CONFIG_PACKAGE_luci-app-dae=y" >> $config_file
+}
+
+function add_geodata() {
+  remove_package v2ray-geodata
+  cp -rv $GITHUB_WORKSPACE/patches/custom/package/v2ray-geodata ./package/
+  echo "CONFIG_PACKAGE_v2ray-geodata-updater=y" >> $config_file
+  echo "CONFIG_PACKAGE_v2ray-geodata=y" >> $config_file
+}
+
 # 主要执行程序
+add_dae
 add_daed
-set_theme
-add_nps
 add_watchdog
+add_geodata
 # add_netdata
 add_adguardhome
 add_other_package
