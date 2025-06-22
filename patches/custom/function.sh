@@ -273,6 +273,13 @@ function add_mosdns() {
   echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> $config_file
 }
 
+function add_netspeedtest() {
+  remove_package luci-app-netspeedtest
+  git_sparse_clone main https://github.com/sirpdboy/luci-app-netspeedtest \
+      luci-app-netspeedtest netspeedtest homebox speedtest-cli
+  echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -285,6 +292,7 @@ add_geodata
 add_mosdns
 # add_netdata
 add_adguardhome
+add_netspeedtest
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
