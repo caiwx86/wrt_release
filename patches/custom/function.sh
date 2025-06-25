@@ -181,6 +181,7 @@ function add_daed() {
   git_sparse_clone master https://github.com/QiuSimons/luci-app-daed \
       daed luci-app-daed
 
+  echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
   # 解决luci-app-daed 依赖问题
   # if [[ ! -d "package/libcron" ]]; then
   #    mkdir -p package/libcron && wget -O package/libcron/Makefile https://raw.githubusercontent.com/immortalwrt/packages/refs/heads/master/libs/libcron/Makefile
@@ -191,6 +192,9 @@ function set_theme() {
   remove_package luci-app-argon-config luci-theme-argon 
   git_sparse_clone openwrt-24.10 https://github.com/sbwml/luci-theme-argon \
      luci-app-argon-config luci-theme-argon 
+  # 添加argon主题配置
+  echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> $config_file
+  echo "CONFIG_PACKAGE_luci-theme-argon=y" >> $config_file
 
   argon_css_file=$(find ./package/luci-theme-argon/ -type f -name "cascade.css")
   #修改字体
@@ -207,6 +211,8 @@ function add_nps() {
   remove_package nps npc luci-app-nps luci-app-npc
   git_sparse_clone main https://github.com/djylb/nps-openwrt \
       npc luci-app-npc
+  
+  echo "CONFIG_PACKAGE_luci-app-npc=y" >> $config_file
 }
 
 function add_watchdog() {
