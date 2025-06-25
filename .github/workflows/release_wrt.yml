@@ -16,6 +16,7 @@ on:
           - jdcloud_ipq60xx_immwrt
           - jdcloud_ipq60xx_libwrt
           - n1_immwrt
+          - r68s_immwrt
           - redmi_ax5_immwrt
           - redmi_ax6_immwrt
           - redmi_ax6_libwrt
@@ -124,13 +125,13 @@ jobs:
           echo "=============================================="
 
       - name: Package OpenWrt Firmware
-        if: ${{ inputs.model == 'n1_immwrt' }}
+        if: ${{ inputs.model == 'r68s_immwrt' }}
         uses: unifreq/openwrt_packit@master
         env:
           OPENWRT_ARMVIRT: firmware/*.tar.gz
-          PACKAGE_SOC: s905d
+          PACKAGE_SOC: r68s
           KERNEL_VERSION_NAME: 6.6.y
-          WHOAMI: ZqinKing
+          WHOAMI: Caiwx86 
 
       - name: Prepare Release Body
         run: |
