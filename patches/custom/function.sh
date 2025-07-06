@@ -286,6 +286,12 @@ function add_netspeedtest() {
   echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> $config_file
 }
 
+function add_wechatpush(){
+  remove_package luci-app-wechatpush
+  git clone --depth=1 -b master https://github.com/tty228/luci-app-wechatpush package/luci-app-wechatpush
+  echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -299,6 +305,7 @@ add_mosdns
 # add_netdata
 add_adguardhome
 add_netspeedtest
+add_wechatpush
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
