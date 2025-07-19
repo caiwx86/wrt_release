@@ -298,6 +298,14 @@ function add_taskplan() {
   echo "CONFIG_PACKAGE_luci-app-taskplan=y" >> $config_file
 }
 
+function add_msd_lite() { 
+  remove_package msd_lite luci-app-msd_lite
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      msd_lite luci-app-msd_lite
+  echo "CONFIG_PACKAGE_luci-app-msd-lite=y" >> $config_file
+
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -313,6 +321,7 @@ add_adguardhome
 add_netspeedtest
 add_wechatpush
 add_taskplan
+add_msd_lite
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
