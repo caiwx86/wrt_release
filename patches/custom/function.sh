@@ -223,8 +223,8 @@ function add_watchdog() {
 }
 
 function add_netdata() {
-  remove_package luci-app-netdata
-  # 添加额外插件
+  remove_package netdata luci-app-netdata
+  git clone https://github.com/muink/openwrt-netdata-ssl package/netdata
   git clone https://github.com/muink/luci-app-netdata package/luci-app-netdata
   echo "CONFIG_PACKAGE_luci-app-netdata=y" >> $config_file
 }
