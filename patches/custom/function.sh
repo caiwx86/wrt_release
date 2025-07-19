@@ -292,6 +292,13 @@ function add_wechatpush(){
   echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> $config_file
 }
 
+function add_taskplan() {
+  remove_package luci-app-taskplan
+  git_sparse_clone master https://github.com/sirpdboy/luci-app-taskplan \
+      luci-app-taskplan
+  echo "CONFIG_PACKAGE_luci-app-taskplan=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -299,13 +306,14 @@ echo "" >> $config_file
 add_daed
 set_theme
 add_nps
-# add_watchdog
+add_watchdog
 add_geodata
 add_mosdns
 # add_netdata
 add_adguardhome
 add_netspeedtest
 add_wechatpush
+add_taskplan
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
