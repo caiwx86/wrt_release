@@ -223,10 +223,9 @@ function add_watchdog() {
 }
 
 function add_netdata() {
-  remove_package netdata luci-app-netdata
+  remove_package luci-app-netdata
   # 添加额外插件
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
-      netdata luci-app-netdata
+  git clone https://github.com/muink/luci-app-netdata package/luci-app-netdata
   echo "CONFIG_PACKAGE_luci-app-netdata=y" >> $config_file
 }
 
@@ -309,7 +308,7 @@ add_nps
 add_watchdog
 add_geodata
 add_mosdns
-# add_netdata
+add_netdata
 add_adguardhome
 add_netspeedtest
 add_wechatpush
