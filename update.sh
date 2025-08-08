@@ -23,7 +23,7 @@ FEEDS_CONF="feeds.conf.default"
 GOLANG_REPO="https://github.com/sbwml/packages_lang_golang"
 GOLANG_BRANCH="25.x"
 THEME_SET="argon"
-LAN_ADDR="10.0.10.1"
+LAN_ADDR="192.168.1.1"
 
 clone_repo() {
     if [[ ! -d $BUILD_DIR ]]; then
@@ -284,6 +284,28 @@ update_affinity_script() {
     fi
 }
 
+# 通用函数，用于修正 Makefile 中的哈希值
+fix_hash_value() {
+    local makefile_path="$1"
+    local old_hash="$2"
+    local new_hash="$3"
+    local package_name="$4"
+
+    if [ -f "$makefile_path" ]; then
+        sed -i "s/$old_hash/$new_hash/g" "$makefile_path"
+        echo "已修正 $package_name 的哈希值。"
+    fi
+}
+
+# 应用所有哈希值修正
+apply_hash_fixes() {
+    fix_hash_value \
+        "$BUILD_DIR/package/feeds/packages/smartdns/Makefile" \
+        "150019a03f1ec2e4b5849740a72badf5ea094d5754bd59dd30119523a3ce9398" \
+        "abcb3d3bfa99297dfb92b8fb4f1f78d0948a01281fdfc76c9c460a2c3d5c7f79" \
+        "smartdns"
+}
+
 update_ath11k_fw() {
     local makefile="$BUILD_DIR/package/firmware/ath11k-firmware/Makefile"
     local new_mk="$BASE_PATH/patches/ath11k_fw.mk"
@@ -394,13 +416,18 @@ EOF
     chmod +x "$sh_dir/custom_task"
 }
 
-# 清理 Passwall 的 chnlist 规则文件
-clear_passwall_chnlist() {
+# 应用 Passwall 相关调整
+apply_passwall_tweaks() {
+    # 清理 Passwall 的 chnlist 规则文件
     local chnlist_path="$BUILD_DIR/feeds/small8/luci-app-passwall/root/usr/share/passwall/rules/chnlist"
-
-    # 如果 chnlist 文件存在，则清空其内容
     if [ -f "$chnlist_path" ]; then
         > "$chnlist_path"
+    fi
+
+    # 调整 Xray 最大 RTT
+    local xray_util_path="$BUILD_DIR/feeds/small8/luci-app-passwall/luasrc/passwall/util_xray.lua"
+    if [ -f "$xray_util_path" ]; then
+        sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
     fi
 }
 
@@ -438,7 +465,7 @@ update_nss_pbuf_performance() {
 set_build_signature() {
     local file="$BUILD_DIR/feeds/luci/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js"
     if [ -d "$(dirname "$file")" ] && [ -f $file ]; then
-        sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ build by Caiwx')/g" "$file"
+        sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ build by ZqinKing')/g" "$file"
     fi
 }
 
@@ -878,7 +905,7 @@ main() {
     update_tcping
     add_ax6600_led
     set_custom_task
-    clear_passwall_chnlist
+    apply_passwall_tweaks
     install_opkg_distfeeds
     update_nss_pbuf_performance
     set_build_signature
@@ -901,6 +928,7 @@ main() {
     update_uwsgi_limit_as
     update_argon
     install_feeds
+    apply_hash_fixes # 调用哈希修正函数
     support_fw4_adg
     update_script_priority
     fix_easytier
