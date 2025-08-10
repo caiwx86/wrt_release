@@ -310,7 +310,7 @@ function add_msd_lite() {
 # 解决配置文件未换行问题
 echo "" >> $config_file
 # add_dae
-add_daed
+# add_daed
 set_theme
 add_nps
 add_watchdog
