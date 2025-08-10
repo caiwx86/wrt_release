@@ -325,6 +325,12 @@ function add_msd_lite() {
 
 }
 
+function add_usb_net() {
+  # 添加USB网卡驱动
+  echo "添加USB网卡驱动"
+  cat $GITHUB_WORKSPACE/patches/custom/usb_net.cfg >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -341,6 +347,7 @@ add_netspeedtest
 add_wechatpush
 add_taskplan
 add_msd_lite
+add_usb_net
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
