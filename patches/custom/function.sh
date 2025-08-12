@@ -179,8 +179,13 @@ function add_daed() {
   remove_package daed luci-app-daed
   # 添加额外插件
   git_sparse_clone master https://github.com/QiuSimons/luci-app-daed \
-      daed luci-app-daed
-
+      daed luci-app-daed 
+  #修复daed/Makefile
+  if [ -f "package/daed/Makefile" ]; then
+      rm -rf package/daed/Makefile && cp -r $GITHUB_WORKSPACE/patches/custom/patch/daed/Makefile package/daed/
+      cat package/daed/Makefile
+  fi
+  # 添加daed配置
   echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
   # 解决luci-app-daed 依赖问题
   # if [[ ! -d "package/libcron" ]]; then
