@@ -174,31 +174,17 @@ function remove_package() {
    done
 }
 
-function add_daed_bpf_conf() {
-  # 添加daed配置
-  echo "CONFIG_DEVEL=y" >> $config_file
-  echo "CONFIG_KERNEL_DEBUG_INFO=y" >> $config_file
-  echo "CONFIG_KERNEL_DEBUG_INFO_REDUCED=n" >> $config_file
-  echo "CONFIG_KERNEL_DEBUG_INFO_BTF=y" >> $config_file
-  echo "CONFIG_KERNEL_CGROUPS=y" >> $config_file
-  echo "CONFIG_KERNEL_CGROUP_BPF=y" >> $config_file
-  echo "CONFIG_KERNEL_BPF_EVENTS=y" >> $config_file
-  echo "CONFIG_BPF_TOOLCHAIN_HOST=y" >> $config_file
-  echo "CONFIG_KERNEL_XDP_SOCKETS=y" >> $config_file
-  echo "CONFIG_PACKAGE_kmod-xdp-sockets-diag=y" >> $config_file
-}
-
 function add_daed() {
   # 删除不用插件
   remove_package daed luci-app-daed
   # 添加额外插件
-  # git_sparse_clone master https://github.com/QiuSimons/luci-app-daed \
-  #     daed luci-app-daed
-  
-  git_sparse_clone main https://github.com/kenzok8/small-package \
-      daed luci-app-daed
-  
-  add_daed_bpf_conf
+  git_sparse_clone master https://github.com/QiuSimons/luci-app-daed \
+      daed luci-app-daed 
+  #修复daed/Makefile
+  if [ -f "package/daed/Makefile" ]; then
+      rm -rf package/daed/Makefile && cp -r $GITHUB_WORKSPACE/patches/custom/patch/daed/Makefile package/daed/
+      cat package/daed/Makefile
+  fi
   # 添加daed配置
   echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
   # 解决luci-app-daed 依赖问题, 该问题存在于LEDE库
