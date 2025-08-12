@@ -265,6 +265,9 @@ function add_defaults_settings() {
 function add_dae() {
   remove_package dae luci-app-dae
   cp -rv $GITHUB_WORKSPACE/patches/custom/package/dae ./package/
+  if [[ -f "package/dae/Makefile" ]]; then
+    rm -rf package/dae/Makefile && wget -O package/dae/Makefile https://raw.githubusercontent.com/davidtall/OpenWRT-CI/refs/heads/main/package/dae/Makefile
+  fi
   cp -rv $GITHUB_WORKSPACE/patches/custom/package/luci-app-dae ./package/
   echo "CONFIG_PACKAGE_luci-app-dae=y" >> $config_file
 }
@@ -314,7 +317,7 @@ function add_msd_lite() {
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
-# add_dae
+add_dae
 add_daed
 set_theme
 add_nps
