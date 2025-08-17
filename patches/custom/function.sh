@@ -310,7 +310,7 @@ function add_msd_lite() {
   remove_package msd_lite luci-app-msd_lite
   git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
       msd_lite luci-app-msd_lite
-  echo "CONFIG_PACKAGE_luci-app-msd-lite=y" >> $config_file
+  echo "CONFIG_PACKAGE_luci-app-msd_lite=y" >> $config_file
 
 }
 
