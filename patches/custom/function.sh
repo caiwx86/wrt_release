@@ -310,6 +310,11 @@ function add_msd_lite() {
   remove_package msd_lite luci-app-msd_lite
   git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
       msd_lite luci-app-msd_lite
+  
+  if [[ -f "package/msd_lite/Makefile" ]]; then
+    rm -rf package/msd_lite/Makefile && wget -O package/msd_lite/Makefile https://raw.githubusercontent.com/immortalwrt/packages/refs/heads/master/net/msd_lite/Makefile 
+  fi
+
   echo "CONFIG_PACKAGE_luci-app-msd_lite=y" >> $config_file
 
 }
