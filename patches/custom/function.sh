@@ -293,6 +293,9 @@ function add_netspeedtest() {
 function add_wechatpush(){
   remove_package luci-app-wechatpush
   git clone --depth=1 -b master https://github.com/tty228/luci-app-wechatpush package/luci-app-wechatpush
+  # fix wechatpush build
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      wrtbwmon
   echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> $config_file
 }
 
