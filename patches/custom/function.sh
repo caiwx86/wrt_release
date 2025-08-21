@@ -243,6 +243,12 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_jq=y" >> $config_file
   # gdisk
   echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
+
+  # DNSMASQ DNSSERVER
+  if [[ -f "package/network/services/dnsmasq/files/dnsmasq.init" ]]; then
+      sed -i 's/DNS_SERVERS=\"\"/DNS_SERVERS=\"223.5.5.5 8.8.4.4\"/g' package/network/services/dnsmasq/files/dnsmasq.init
+      echo "修改dnsmasq默认DNS服务器为223.5.5.5 8.8.4.4"
+  fi
 }
 
 function add_adguardhome() {
