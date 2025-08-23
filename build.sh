@@ -72,6 +72,8 @@ remove_uhttpd_dependency
 # 添加其他NSS/12M大内核及daed适配等其他优化
 chmod +x $BASE_PATH/patches/custom/function.sh && $BASE_PATH/patches/custom/function.sh "$BASE_PATH/$BUILD_DIR"
 cat "$BASE_PATH/$BUILD_DIR/.config"
+# 固件平台
+WRT_TARGET=$(grep -m 1 -oP '^CONFIG_TARGET_\K[\w]+(?=\=y)' $BASE_PATH/$BUILD_DIR/.config)
 
 cd "$BASE_PATH/$BUILD_DIR"
 make defconfig
@@ -100,6 +102,16 @@ FIRMWARE_DIR="$BASE_PATH/firmware"
 mkdir -p "$FIRMWARE_DIR"
 find "$TARGET_DIR" -type f \( -name "*.bin" -o -name "*.manifest" -o -name "*efi.img.gz" -o -name "*.itb" -o -name "*.fip" -o -name "*.ubi" -o -name "*rootfs.tar.gz" \) -exec cp -f {} "$FIRMWARE_DIR/" \;
 \rm -f "$BASE_PATH/firmware/Packages.manifest" 2>/dev/null
+
+# 自定义固件处理
+find $TARGET_DIR/ -iregex ".*\(buildinfo\|json\|sha256sums\|packages\)$" -exec rm -rf {} +
+
+for FILE in $(find $TARGET_DIR/ -type f -iname "*$WRT_TARGET*") ; do
+    EXT=$(basename $FILE | cut -d '.' -f 2-)
+    NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($WRT_TARGET\).*")
+    # NEW_FILE="$WRT_INFO"-"$WRT_BRANCH"-"$NAME"-"$WRT_DATE"."$EXT"
+    mv -f $FILE $FIRMWARE_DIR/ 
+done
 
 if [[ -d $BASE_PATH/action_build ]]; then
     make clean
