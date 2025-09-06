@@ -112,12 +112,15 @@ jobs:
 
       - name: Package OpenWrt Firmware
         if: ${{ inputs.model == 'n1_immwrt' || inputs.model == 'rockchip_immwrt' }}
-        uses: unifreq/openwrt_packit@master
+        uses: ophub/flippy-openwrt-actions@main
         env:
           OPENWRT_ARMVIRT: firmware/*.tar.gz
           PACKAGE_SOC: s905d_r68s
           KERNEL_VERSION_NAME: 6.1.y_6.12.y
           WHOAMI: Caiwx
+          KERNEL_AUTO_LATEST: true
+          DISTRIB_REVISION: R${{ env.BUILD_DATE }} by Caiwx 
+
 
       - name: Prepare Release Body
         run: |
