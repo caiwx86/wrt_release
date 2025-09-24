@@ -244,6 +244,8 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_jq=y" >> $config_file
   # gdisk
   echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
+  # luci-app-mwan3
+  echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
 
   # DNSMASQ DNSSERVER
   if [[ -f "package/network/services/dnsmasq/files/dnsmasq.init" ]]; then
