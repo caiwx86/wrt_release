@@ -111,7 +111,7 @@ jobs:
           echo "=============================================="
 
       - name: Package OpenWrt Firmware
-        if: ${{ inputs.model == 'n1_immwrt' || inputs.model == 'rockchip_immwrt' }}
+        if: ${{ inputs.model == 'n1_immwrt' || inputs.model == 'rockchip_immwrt1' }}
         uses: ophub/flippy-openwrt-actions@main
         env:
           OPENWRT_ARMVIRT: firmware/*.tar.gz
