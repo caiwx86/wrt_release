@@ -164,6 +164,7 @@ function git_sparse_clone() {
   cd .. && rm -rf $repodir
 }
 
+# 删除指定软件包
 function remove_package() {
    packages="$@"
    for package in $packages; do 
@@ -172,6 +173,21 @@ function remove_package() {
          rm -rvf $pkg_path
       fi
    done
+}
+
+# 查找软件包中文件并替换
+# $1: 文件夹路径
+# $2: 文件匹配字符串
+function find_replace() {
+    file_path=$1
+    package=$2
+    pkg_path=$(find . -type d | grep "$package$")
+    if [[ ! "$pkg_path" == "" ]]; then
+        for dir_path in $pkg_path; do 
+          cp -rv $file_path $pkg_path
+          echo "$file_path 文件复制到 $pkg_path 成功"
+        done
+    fi 
 }
 
 function add_daed() {
@@ -245,9 +261,12 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
   # luci-app-mwan3
   echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
-
+  ########################### 修改 DNSMASQ 配置 ###########################
+  dnsmasq_config=package/network/services/dnsmasq/files/
+  # 修改 DNSMASQ 53 端口为 253
+  perl -i -pe 's/option port.*/option port 53/ if /config dnsmasq/../^config/; $_ .= "        option port             253\n" if /option filter_aaaa\t0/ && !/option port/' $dnsmasq_config/dhcp.conf
   # DNSMASQ DNSSERVER
-  if [[ -f "package/network/services/dnsmasq/files/dnsmasq.init" ]]; then
+  if [[ -f "$dnsmasq_config/dnsmasq.init" ]]; then
       sed -i 's/DNS_SERVERS=\"\"/DNS_SERVERS=\"223.5.5.5 8.8.4.4\"/g' package/network/services/dnsmasq/files/dnsmasq.init
       echo "修改dnsmasq默认DNS服务器为223.5.5.5 8.8.4.4"
   fi
@@ -268,6 +287,20 @@ function add_defaults_settings() {
     mkdir -p files/etc/uci-defaults
   fi
   cp $GITHUB_WORKSPACE/patches/custom/init-settings.sh files/etc/uci-defaults/99-init-settings
+
+  # 配置AdGuardHome相关文件
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/config/AdGuardHome             luci-app-adguardhome/root/etc/config
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/AdGuardHome.yaml               luci-app-adguardhome/root/etc
+   
+  # 配置mosdns相关文件
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/config/mosdns                  luci-app-mosdns/root/etc/config
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/mosdns/config_custom.yaml      luci-app-mosdns/root/etc/mosdns
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/mosdns/dat_exec.yaml           luci-app-mosdns/root/etc/mosdns
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/mosdns/dns.yaml                luci-app-mosdns/root/etc/mosdns
+
+  # 配置smartdns相关文件
+  find_replace $GITHUB_WORKSPACE/patches/custom/etc/config/smartdns                smartdns/conf/smartdns.conf 
+
 }
 
 function add_dae() {
