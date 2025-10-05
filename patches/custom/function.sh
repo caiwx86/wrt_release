@@ -356,6 +356,13 @@ function add_msd_lite() {
 
 }
 
+function add_homeproxy() { 
+  remove_package luci-app-homeproxy
+  git clone --depth=1 -b main https://github.com/VIKINGYFY/homeproxy package/luci-app-homeproxy
+
+  echo "CONFIG_PACKAGE_luci-app-homeproxy=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -372,6 +379,7 @@ add_netspeedtest
 add_wechatpush
 add_taskplan
 add_msd_lite
+add_homeproxy
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
