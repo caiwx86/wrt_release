@@ -370,6 +370,12 @@ function add_homeproxy() {
   echo "CONFIG_PACKAGE_luci-app-homeproxy=y" >> $config_file
 }
 
+function add_turboacc() {
+  remove_package luci-app-turboacc
+  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+      luci-app-turboacc 
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -387,6 +393,7 @@ add_wechatpush
 add_taskplan
 add_msd_lite
 add_homeproxy
+add_turboacc
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
