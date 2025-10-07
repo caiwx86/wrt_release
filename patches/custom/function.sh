@@ -376,6 +376,19 @@ function add_turboacc() {
       luci-app-turboacc 
 }
 
+function add_qbittorrent() {
+  remove_package luci-app-qbittorrent
+  git clone --depth=1 -b master https://github.com/sbwml/luci-app-qbittorrent package/luci-app-qbittorrent
+  echo "CONFIG_PACKAGE_luci-app-qbittorrent=y" >> $config_file
+}
+
+function add_transmission() {
+  remove_package luci-app-transmission
+  git_sparse_clone main https://github.com/kenzok8/small-package \
+      luci-app-transmission transmission 
+  echo "CONFIG_PACKAGE_luci-app-transmission=y" >> $config_file
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -394,6 +407,8 @@ add_taskplan
 add_msd_lite
 add_homeproxy
 add_turboacc
+add_qbittorrent
+add_transmission
 add_other_package
 add_defaults_settings
 generate_config && cat $config_file
