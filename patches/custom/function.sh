@@ -389,6 +389,18 @@ function add_transmission() {
   echo "CONFIG_PACKAGE_luci-app-transmission=y" >> $config_file
 }
 
+update_menu() {
+    local qbittorrent_path="$BASE_PATH/package/luci-app-qbittorrent/luci-app-qbittorrent/root/usr/share/luci/menu.d/luci-app-qbittorrent.json"
+    if [ -d "$(dirname "$qbittorrent_path")" ] && [ -f "$qbittorrent_path" ]; then
+        sed -i 's/nas/services/g' "$qbittorrent_path"
+    fi
+
+    local transmission_path="$BASE_PATH/package/luci-app-transmission/root/usr/share/luci/menu.d/luci-app-transmission.json"
+    if [ -d "$(dirname "$transmission_path")" ] && [ -f "$transmission_path" ]; then
+        sed -i 's/nas/services/g' "$transmission_path"
+    fi
+}
+
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
@@ -410,5 +422,6 @@ add_turboacc
 add_qbittorrent
 add_transmission
 add_other_package
+update_menu
 add_defaults_settings
 generate_config && cat $config_file
