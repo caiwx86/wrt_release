@@ -261,6 +261,8 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
   # luci-app-mwan3
   echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
+  # coreutils-timeout sd2
+  echo "CONFIG_PACKAGE_coreutils-timeout=y" >> $config_file
   ########################### 修改 DNSMASQ 配置 ###########################
   dnsmasq_config=package/network/services/dnsmasq/files/
   # 修改 DNSMASQ 53 端口为 253
