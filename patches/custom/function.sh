@@ -263,6 +263,10 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
   # coreutils-timeout sd2
   echo "CONFIG_PACKAGE_coreutils-timeout=y" >> $config_file
+  # mqtt
+  echo "CONFIG_PACKAGE_mosquitto-client=y" >> $config_file
+  echo "CONFIG_PACKAGE_mosquitto-client-nossl=y" >> $config_file
+  echo "CONFIG_PACKAGE_mosquitto-client-ssl=y" >> $config_file
   ########################### 修改 DNSMASQ 配置 ###########################
   dnsmasq_config=package/network/services/dnsmasq/files/
   # 修改 DNSMASQ 53 端口为 253
