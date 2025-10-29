@@ -410,7 +410,7 @@ update_menu() {
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
-add_dae
+# add_dae
 add_daed
 set_theme
 add_nps
@@ -422,8 +422,8 @@ add_adguardhome
 add_netspeedtest
 add_wechatpush
 add_taskplan
-add_msd_lite
-add_homeproxy
+# add_msd_lite
+# add_homeproxy
 add_turboacc
 add_qbittorrent
 add_transmission
