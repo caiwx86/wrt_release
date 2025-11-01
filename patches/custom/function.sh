@@ -305,7 +305,7 @@ function add_defaults_settings() {
   find_replace $GITHUB_WORKSPACE/patches/custom/etc/mosdns/dns.yaml                luci-app-mosdns/root/etc/mosdns
 
   # 配置smartdns相关文件
-  find_replace $GITHUB_WORKSPACE/patches/custom/etc/config/smartdns                smartdns/conf/smartdns.conf 
+  # find_replace $GITHUB_WORKSPACE/patches/custom/etc/config/smartdns                smartdns/conf/smartdns.conf 
 
 }
 
