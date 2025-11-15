@@ -412,8 +412,8 @@ add_wechatpush
 add_taskplan
 add_msd_lite
 add_homeproxy
-add_qbittorrent
-add_transmission
+# add_qbittorrent
+# add_transmission
 add_other_package
 update_menu
 add_defaults_settings
