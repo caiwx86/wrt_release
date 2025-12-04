@@ -50,7 +50,4 @@ else
 fi
 #/etc/init.d/cron start
 #/etc/init.d/cron enable
-# Enable required services
-service rpcd start && service rpcd enable
-service uhttpd start && service uhttpd enable
 exit 0

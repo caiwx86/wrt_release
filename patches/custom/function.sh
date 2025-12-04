@@ -264,11 +264,11 @@ function add_other_package() {
   echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
   # OpenWrt Ubus Integration for Home Assistant
   # https://github.com/FUjr/homeassistant-openwrt-ubus/blob/v0.0.6/README_zh.md
-  echo "CONFIG_PACKAGE_rpcd=y" >> $config_file
-  echo "CONFIG_PACKAGE_uhttpd-mod-ubus=y" >> $config_file
-  echo "CONFIG_PACKAGE_luci-app-uhttpd=y" >> $config_file
-  echo "CONFIG_PACKAGE_hostapd=y" >> $config_file
-  echo "CONFIG_PACKAGE_coreutils-timeout=y" >> $config_file
+  # echo "CONFIG_PACKAGE_rpcd=y" >> $config_file
+  # echo "CONFIG_PACKAGE_uhttpd-mod-ubus=y" >> $config_file
+  # echo "CONFIG_PACKAGE_luci-app-uhttpd=y" >> $config_file
+  # echo "CONFIG_PACKAGE_hostapd=y" >> $config_file
+  # echo "CONFIG_PACKAGE_coreutils-timeout=y" >> $config_file
   
   ########################### 修改 DNSMASQ 配置 ###########################
   dnsmasq_config=package/network/services/dnsmasq/files/
