@@ -35,3 +35,4 @@ deconfig/aliyun_ap8220_nwrt.config
 compilecfg/aliyum_ap8220_nwrt.ini
 .env
 .taskmaster/
+.DS_Store
