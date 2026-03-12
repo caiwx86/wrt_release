@@ -108,7 +108,7 @@ function add_daed() {
   # 删除不用插件
   remove_package daed luci-app-daed
   # 添加额外插件
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages     \
+  git_sparse_clone main https://github.com/kiddin9/op-packages     \
       daed
   git_sparse_clone master https://github.com/QiuSimons/luci-app-daed \
       luci-app-daed 
@@ -144,6 +144,7 @@ function add_nps() {
   git_sparse_clone main https://github.com/djylb/nps-openwrt \
       npc luci-app-npc
   
+  echo "CONFIG_PACKAGE_npc=y" >> $config_file
   echo "CONFIG_PACKAGE_luci-app-npc=y" >> $config_file
 }
 
@@ -253,21 +254,21 @@ function add_wechatpush(){
   remove_package luci-app-wechatpush
   git clone --depth=1 -b master https://github.com/tty228/luci-app-wechatpush package/luci-app-wechatpush
   # fix wechatpush build
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+  git_sparse_clone main https://github.com/kiddin9/op-packages \
       wrtbwmon
   echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> $config_file
 }
 
 function add_taskplan() {
   remove_package luci-app-taskplan
-  git_sparse_clone master https://github.com/sirpdboy/luci-app-taskplan \
+  git_sparse_clone main https://github.com/sirpdboy/luci-app-taskplan \
       luci-app-taskplan
   echo "CONFIG_PACKAGE_luci-app-taskplan=y" >> $config_file
 }
 
 function add_msd_lite() { 
   remove_package msd_lite luci-app-msd_lite
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+  git_sparse_clone main https://github.com/kiddin9/op-packages \
       msd_lite luci-app-msd_lite
   echo "CONFIG_PACKAGE_luci-app-msd-lite=y" >> $config_file
 
@@ -282,7 +283,7 @@ function add_homeproxy() {
 
 function add_turboacc() {
   remove_package luci-app-turboacc
-  git_sparse_clone main https://github.com/kiddin9/kwrt-packages \
+  git_sparse_clone main https://github.com/kiddin9/op-packages \
       luci-app-turboacc 
 }
 
