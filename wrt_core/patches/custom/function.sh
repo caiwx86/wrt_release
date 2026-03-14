@@ -300,6 +300,13 @@ function add_transmission() {
   echo "CONFIG_PACKAGE_luci-app-transmission=y" >> $config_file
 }
 
+function add_openlist() {
+  remove_package openlist luci-app-openlist
+  git_sparse_clone main https://github.com/sbwml/luci-app-openlist2 \
+      openlist2 luci-app-openlist2
+  echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> $config_file
+}
+
 update_menu() {
     local qbittorrent_path="$BASE_PATH/package/luci-app-qbittorrent/luci-app-qbittorrent/root/usr/share/luci/menu.d/luci-app-qbittorrent.json"
     if [ -d "$(dirname "$qbittorrent_path")" ] && [ -f "$qbittorrent_path" ]; then
@@ -329,6 +336,7 @@ add_wechatpush
 add_taskplan
 add_msd_lite
 add_homeproxy
+add_openlist
 # add_turboacc
 # add_qbittorrent
 # add_transmission
