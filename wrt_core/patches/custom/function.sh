@@ -245,8 +245,8 @@ function add_mosdns() {
 
 function add_netspeedtest() {
   remove_package luci-app-netspeedtest
-  git_sparse_clone master https://github.com/sirpdboy/luci-app-netspeedtest \
-      luci-app-netspeedtest netspeedtest homebox speedtest-cli
+  git_sparse_clone main https://github.com/sirpdboy/netspeedtest \
+      luci-app-netspeedtest ookla-speedtest homebox 
   echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> $config_file
 }
 
