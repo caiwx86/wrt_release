@@ -163,17 +163,6 @@ add_timecontrol() {
     fi
 }
 
-add_gecoosac() {
-    local gecoosac_dir="$BUILD_DIR/package/openwrt-gecoosac"
-    local repo_url="https://github.com/lwb1978/openwrt-gecoosac.git"
-    rm -rf "$gecoosac_dir" 2>/dev/null
-    echo "正在添加 openwrt-gecoosac..."
-    if ! git clone --depth 1 "$repo_url" "$gecoosac_dir"; then
-        echo "错误：从 $repo_url 克隆 openwrt-gecoosac 仓库失败" >&2
-        exit 1
-    fi
-}
-
 update_adguardhome() {
     local adguardhome_dir="$BUILD_DIR/package/feeds/small8/luci-app-adguardhome"
     local repo_url="https://github.com/ZqinKing/luci-app-adguardhome.git"
@@ -306,6 +295,69 @@ update_diskman() {
 
         sed -i 's/fs-ntfs /fs-ntfs3 /g' "$path/Makefile"
         sed -i '/ntfs-3g-utils /d' "$path/Makefile"
+    fi
+}
+
+_sync_luci_lib_docker() {
+    local lib_path="$BUILD_DIR/feeds/luci/libs/luci-lib-docker"
+    local repo_url="https://github.com/lisaac/luci-lib-docker.git"
+    
+    if [ ! -d "$lib_path" ]; then
+        echo "正在同步 luci-lib-docker..."
+        mkdir -p "$BUILD_DIR/feeds/luci/libs" || return
+        cd "$BUILD_DIR/feeds/luci/libs" || return
+        
+        if ! git clone --filter=blob:none --no-checkout "$repo_url" luci-lib-docker-tmp; then
+            echo "错误：从 $repo_url 克隆 luci-lib-docker 仓库失败" >&2
+            exit 1
+        fi
+        cd luci-lib-docker-tmp || return
+        
+        git sparse-checkout init --cone
+        git sparse-checkout set collections/luci-lib-docker || return
+        
+        git checkout --quiet
+        
+        mv collections/luci-lib-docker ../luci-lib-docker || return
+        cd .. || return
+        \rm -rf luci-lib-docker-tmp
+        cd "$BUILD_DIR"
+        echo "luci-lib-docker 同步完成"
+    fi
+}
+
+update_dockerman() {
+    local path="$BUILD_DIR/feeds/luci/applications/luci-app-dockerman"
+    local repo_url="https://github.com/lisaac/luci-app-dockerman.git"
+
+    if [ -d "$path" ]; then
+        echo "正在更新 dockerman..."
+        _sync_luci_lib_docker || return
+        
+        cd "$BUILD_DIR/feeds/luci/applications" || return
+        \rm -rf "luci-app-dockerman"
+
+        if ! git clone --filter=blob:none --no-checkout "$repo_url" dockerman; then
+            echo "错误：从 $repo_url 克隆 dockerman 仓库失败" >&2
+            exit 1
+        fi
+        cd dockerman || return
+
+        git sparse-checkout init --cone
+        git sparse-checkout set applications/luci-app-dockerman || return
+
+        git checkout --quiet
+
+        mv applications/luci-app-dockerman ../luci-app-dockerman || return
+        cd .. || return
+        \rm -rf dockerman
+        cd "$BUILD_DIR"
+
+        if declare -F docker_stack_sync_dockerman_nftables_compat >/dev/null 2>&1; then
+            docker_stack_sync_dockerman_nftables_compat "$BUILD_DIR" "0" || return 1
+        fi
+
+        echo "dockerman 更新完成"
     fi
 }
 
