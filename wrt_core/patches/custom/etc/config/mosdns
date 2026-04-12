@@ -1,0 +1,13 @@
+
+config mosdns 'config'
+	option geo_auto_update '0'
+	option geo_update_week_time '6'
+	option geo_update_day_time '2'
+	option configfile '/etc/mosdns/config_custom.yaml'
+	option enabled '1'
+	option geoip_type 'geoip'
+	list geoip_tags 'private'
+	list geoip_tags 'cn'
+	list geosite_tags 'cn'
+	list geosite_tags 'gfw'
+
