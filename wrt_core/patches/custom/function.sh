@@ -203,7 +203,7 @@ function add_daed() {
   # 添加额外插件
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
       luci-app-daed daed vmlinux-btf
-  _daed_fix "https://github.com/daeuniverse/daed.git" daed 864c43418e453df0706c9689a2f3d7b268cb1808
+  # _daed_fix "https://github.com/daeuniverse/daed.git" daed
   # 添加daed配置
   echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
 }
@@ -307,7 +307,7 @@ function add_dae() {
   remove_package dae luci-app-dae
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
       dae luci-app-dae
-  _daed_fix "https://github.com/daeuniverse/dae.git" dae
+  # _daed_fix "https://github.com/daeuniverse/dae.git" dae
   echo "CONFIG_PACKAGE_luci-app-dae=y" >> $config_file
 }
 
