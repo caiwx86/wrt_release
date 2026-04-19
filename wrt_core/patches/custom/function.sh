@@ -282,8 +282,8 @@ function add_homeproxy() {
 
 function add_netspeedtest() {
   remove_package luci-app-netspeedtest
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-netspeedtest ookla-speedtest homebox
+  git_sparse_clone small-package https://github.com/caiwx86/openwrt-packages \
+      luci-app-netspeedtest homebox
   echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> $config_file
 }
 
@@ -369,7 +369,7 @@ add_watchdog
 add_mosdns
 add_netdata
 add_adguardhome
-# add_netspeedtest
+add_netspeedtest
 add_wechatpush
 add_taskplan
 add_msd_lite
