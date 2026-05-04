@@ -202,9 +202,9 @@ function add_daed() {
   remove_package daed luci-app-daed
   # 添加额外插件
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-daed daed vmlinux-btf
-  #  git_sparse_clone "kix" "https://github.com/QiuSimons/luci-app-daed" \
-  #    daed
+      luci-app-daed vmlinux-btf
+  git_sparse_clone "kix" "https://github.com/QiuSimons/luci-app-daed" \
+      daed
   # _daed_fix "https://github.com/daeuniverse/daed.git" daed
   # 添加daed配置
   echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
