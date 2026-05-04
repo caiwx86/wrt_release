@@ -12,6 +12,8 @@ immortalwrt/
 compilecfg/test.ini
 deconfig/test.config
 *.swp
+.DS_Store
+*.patch
 .vscode/settings.json
 deconfig/*.bak
 test.sh
