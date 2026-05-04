@@ -206,6 +206,13 @@ function add_daed() {
   git_sparse_clone "kix" "https://github.com/QiuSimons/luci-app-daed" \
       daed
   # _daed_fix "https://github.com/daeuniverse/daed.git" daed
+  
+  #修复daed/Makefile
+  #rm -rf luci-app-daed/daed/Makefile && cp -r $GITHUB_WORKSPACE/patches/daed/Makefile luci-app-daed/daed/
+  sed -i 's/pnpm install ; \\/pnpm install --no-frozen-lockfile ; \\/g'  $BASE_PATH/package/daed/Makefile
+  sed -i 's|github.com/daeuniverse/quic-go|github.com/olicesx/quic-go|g' $BASE_PATH/package/daed/Makefile
+  sed -i 's|/run/i\\  procd_set_param|/procd_set_param command/i \\\tprocd_set_param|g' $BASE_PATH/package/daed/luci-app-daed/root/etc/init.d/luci_daed
+  #cat luci-app-daed/daed/Makefile
   # 添加daed配置
   echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
 }
