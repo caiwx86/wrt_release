@@ -206,6 +206,9 @@ fi
 apply_config
 remove_uhttpd_dependency
 
+chmod +x $BASE_PATH/patches/custom/function.sh && $BASE_PATH/patches/custom/function.sh "$BASE_PATH/../$BUILD_DIR"
+cat "$BASE_PATH/../$BUILD_DIR/.config"
+
 cd "$BASE_PATH/../$BUILD_DIR"
 make defconfig
 
@@ -225,7 +228,7 @@ if [[ -d $TARGET_DIR ]]; then
     find "$TARGET_DIR" -type f \( -name "*.bin" -o -name "*.manifest" -o -name "*efi.img.gz" -o -name "*.itb" -o -name "*.fip" -o -name "*.ubi" -o -name "*rootfs.tar.gz" \) -exec rm -f {} +
 fi
 
-make download -j$(($(nproc) * 2))
+make download -j$(($(nproc) * 2)) || make download -j1 V=s
 make -j$(($(nproc) + 1)) || make -j1 V=s
 
 FIRMWARE_DIR="$BASE_PATH/../firmware"
