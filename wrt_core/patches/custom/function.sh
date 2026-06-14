@@ -220,7 +220,7 @@ function add_other_package() {
   # gdisk
   echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
   # luci-app-mwan3
-  echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
+  # echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
   
   ########################### 修改 DNSMASQ 配置 ###########################
   dnsmasq_config=package/network/services/dnsmasq/files/
@@ -385,9 +385,9 @@ add_adguardhome
 add_netspeedtest
 add_wechatpush
 add_taskplan
-add_msd_lite
-add_homeproxy
-add_openlist
+# add_msd_lite
+# add_homeproxy
+# add_openlist
 # add_turboacc
 # add_qbittorrent
 # add_transmission
