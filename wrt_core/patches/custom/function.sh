@@ -218,7 +218,7 @@ function add_other_package() {
   # jq
   echo "CONFIG_PACKAGE_jq=y" >> $config_file
   # gdisk
-  echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
+  # echo "CONFIG_PACKAGE_gdisk=y" >> $config_file
   # luci-app-mwan3
   # echo "CONFIG_PACKAGE_luci-app-mwan3=y" >> $config_file
   
@@ -358,6 +358,13 @@ function add_smartdns() {
       smartdns luci-app-smartdns 
 }
 
+function add_uugamebooster() {
+  remove_package uugamebooster luci-app-uugamebooster
+  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
+      uugamebooster luci-app-uugamebooster
+  echo "CONFIG_PACKAGE_luci-app-uugamebooster=y" >> $config_file
+}
+
 update_menu() {
     local qbittorrent_path="$BASE_PATH/package/luci-app-qbittorrent/luci-app-qbittorrent/root/usr/share/luci/menu.d/luci-app-qbittorrent.json"
     if [ -d "$(dirname "$qbittorrent_path")" ] && [ -f "$qbittorrent_path" ]; then
@@ -385,6 +392,7 @@ add_adguardhome
 add_netspeedtest
 add_wechatpush
 add_taskplan
+add_uugamebooster
 # add_msd_lite
 # add_homeproxy
 # add_openlist
