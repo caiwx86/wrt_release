@@ -152,12 +152,20 @@ function find_replace() {
     fi 
 }
 
+# 添加软件包
+function add_luci_app() { 
+  app_name=$1
+  remove_package $app_name luci-app-$app_name
+  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
+      $app_name luci-app-$app_name
+  echo "CONFIG_PACKAGE_luci-app-$app_name=y" >> $config_file
+}
+
 function add_daed() {
-  # 删除不用插件
-  remove_package daed luci-app-daed
+  add_luci_app daed
   # 添加额外插件
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-daed vmlinux-btf daed
+      vmlinux-btf
   
   #修复daed/Makefile
   #rm -rf luci-app-daed/daed/Makefile && cp -r $GITHUB_WORKSPACE/patches/daed/Makefile luci-app-daed/daed/
@@ -165,8 +173,6 @@ function add_daed() {
   sed -i 's|github.com/daeuniverse/quic-go|github.com/olicesx/quic-go|g' $BASE_PATH/package/daed/Makefile
   sed -i 's|/run/i\\  procd_set_param|/procd_set_param command/i \\\tprocd_set_param|g' $BASE_PATH/package/daed/luci-app-daed/root/etc/init.d/luci_daed
   #cat luci-app-daed/daed/Makefile
-  # 添加daed配置
-  echo "CONFIG_PACKAGE_luci-app-daed=y" >> $config_file 
 }
 
 function set_theme() {
@@ -189,25 +195,16 @@ function set_theme() {
 }
 
 function add_nps() {
-  remove_package nps npc luci-app-nps luci-app-npc
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      npc luci-app-npc
+  add_luci_app npc
   echo "CONFIG_PACKAGE_npc=y" >> $config_file
-  echo "CONFIG_PACKAGE_luci-app-npc=y" >> $config_file
 }
 
 function add_watchdog() {
-  # 添加额外插件
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      watchdog luci-app-watchdog 
-  echo "CONFIG_PACKAGE_luci-app-watchdog=y" >> $config_file
+  add_luci_app watchdog
 }
 
 function add_netdata() {
-  remove_package netdata luci-app-netdata
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-netdata netdata-ssl
-  echo "CONFIG_PACKAGE_luci-app-netdata=y" >> $config_file
+  add_luci_app netdata
 }
 
 function add_other_package() {
@@ -265,10 +262,7 @@ function add_defaults_settings() {
 }
 
 function add_dae() {
-  remove_package dae luci-app-dae
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      dae luci-app-dae
-  echo "CONFIG_PACKAGE_luci-app-dae=y" >> $config_file
+  add_luci_app dae
 }
 
 function add_geodata() {
@@ -279,18 +273,11 @@ function add_geodata() {
 }
 
 function add_mosdns() {
-  remove_package mosdns luci-app-mosdns
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      mosdns luci-app-mosdns
-    
-  echo "CONFIG_PACKAGE_luci-app-mosdns=y" >> $config_file
+  add_luci_app mosdns
 }
 
 function add_homeproxy() { 
-  remove_package luci-app-homeproxy
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      homeproxy
-  echo "CONFIG_PACKAGE_luci-app-homeproxy=y" >> $config_file
+  add_luci_app homeproxy
 }
 
 function add_netspeedtest() {
@@ -318,11 +305,7 @@ function add_taskplan() {
 }
 
 function add_msd_lite() { 
-  remove_package msd_lite luci-app-msd_lite
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      msd_lite luci-app-msd_lite
-  echo "CONFIG_PACKAGE_luci-app-msd-lite=y" >> $config_file
-
+  add_luci_app msd_lite
 }
 
 function add_turboacc() {
@@ -339,30 +322,28 @@ function add_qbittorrent() {
 }
 
 function add_transmission() {
-  remove_package luci-app-transmission
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-transmission transmission 
-  echo "CONFIG_PACKAGE_luci-app-transmission=y" >> $config_file
+  add_luci_app transmission
 }
 
 function add_openlist() {
-  remove_package openlist luci-app-openlist
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-       openlist2 luci-app-openlist2
-  echo "CONFIG_PACKAGE_luci-app-openlist2=y" >> $config_file
+  add_luci_app openlist2
 }
 
 function add_smartdns() {
-  remove_package smartdns luci-app-smartdns
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      smartdns luci-app-smartdns 
+  add_luci_app smartdns
 }
 
 function add_uugamebooster() {
-  remove_package uugamebooster luci-app-uugamebooster
+  add_luci_app uugamebooster
+}
+
+function add_ghfu() {
+  remove_package luci-app-ghfu
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      uugamebooster luci-app-uugamebooster
-  echo "CONFIG_PACKAGE_luci-app-uugamebooster=y" >> $config_file
+      luci-app-ghfu
+  sed -i 's|smallprogram/OpenWrtAction|caiwx86/wrt_release|g' $BASE_PATH/package/luci-app-ghfu/root/etc/config/ghfu
+  sed -i "s|set ghfu.main.github_repo='smallprogram/OpenWrtAction'|set ghfu.main.github_repo='caiwx86/wrt_release'|g" $PATH/package/luci-app-ghfu/root/etc/uci-defaults/99-ghfu-defaults
+  echo "CONFIG_PACKAGE_luci-app-ghfu=y" >> $config_file
 }
 
 update_menu() {
@@ -393,6 +374,7 @@ add_netspeedtest
 add_wechatpush
 add_taskplan
 add_uugamebooster
+add_ghfu
 # add_msd_lite
 # add_homeproxy
 # add_openlist
