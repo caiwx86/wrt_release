@@ -274,6 +274,8 @@ function add_geodata() {
 
 function add_mosdns() {
   add_luci_app mosdns
+  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
+      geo2txt
 }
 
 function add_homeproxy() { 
@@ -282,8 +284,7 @@ function add_homeproxy() {
 
 function add_netspeedtest() {
   remove_package luci-app-netspeedtest
-  git_sparse_clone small-package https://github.com/caiwx86/openwrt-packages \
-      luci-app-netspeedtest homebox
+  git clone https://github.com/muink/luci-app-netspeedtest ./package/luci-app-netspeedtest 
   echo "CONFIG_PACKAGE_luci-app-netspeedtest=y" >> $config_file
 }
 
@@ -331,10 +332,15 @@ function add_openlist() {
 
 function add_smartdns() {
   add_luci_app smartdns
+  echo "CONFIG_PACKAGE_luci-app-smartdns_INCLUDE_smartdns_ui=y" >> $config_file
 }
 
 function add_uugamebooster() {
   add_luci_app uugamebooster
+}
+
+function add_nikki() {
+  add_luci_app nikki
 }
 
 function add_ghfu() {
@@ -375,6 +381,7 @@ add_wechatpush
 add_taskplan
 add_uugamebooster
 add_ghfu
+add_nikki
 # add_msd_lite
 # add_homeproxy
 # add_openlist
