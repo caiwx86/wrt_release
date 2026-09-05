@@ -342,7 +342,6 @@ function add_openlist() {
 
 function add_smartdns() {
   add_luci_app smartdns
-  echo "CONFIG_PACKAGE_luci-app-smartdns_INCLUDE_smartdns_ui=y" >> $config_file
 }
 
 function add_uugamebooster() {
@@ -380,7 +379,27 @@ update_menu() {
     if [ -d "$(dirname "$transmission_path")" ] && [ -f "$transmission_path" ]; then
         sed -i 's/nas/services/g' "$transmission_path"
     fi
-}
+
+    local upnp_path="$BASE_PATH/feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/luci-app-upnp.json"
+    if [ -d "$(dirname "$upnp_path")" ] && [ -f "$upnp_path" ]; then
+        sed -i 's/services/network/g' "$upnp_path"
+    fi
+
+    local emmc-health_path="$BASE_PATH/custom_feed/luci-app-emmc-health/root/usr/share/luci/menu.d/luci-app-emmc-health.json"
+    if [ -d "$(dirname "${emmc-health_path}")" ] && [ -f "${emmc-health_path}" ]; then
+        sed -i 's/services/network/g' "${emmc-health_path}"
+    fi
+
+    local samba4_path="$BASE_PATH/feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/luci-app-samba4.json"
+    if [ -d "$(dirname "${samba4_path}")" ] && [ -f "${samba4_path}" ]; then
+        sed -i 's/services/network/g' "${samba4_path}"
+    fi
+
+    local npc_path="$BASE_PATH/package/luci-app-npc/root/usr/share/luci/menu.d/luci-app-npc.json"
+    if [ -d "$(dirname "${npc_path}")" ] && [ -f "${npc_path}" ]; then
+        sed -i 's/services/vpn/g' "${npc_path}"
+    fi
+  }
 
 # 主要执行程序
 # 解决配置文件未换行问题
@@ -400,7 +419,7 @@ add_wechatpush
 add_taskplan
 add_uugamebooster
 add_ghfu
-add_nikki
+# add_nikki
 add_clashoo
 # add_msd_lite
 # add_homeproxy
