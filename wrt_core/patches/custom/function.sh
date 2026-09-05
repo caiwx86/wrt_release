@@ -161,6 +161,16 @@ function add_luci_app() {
   echo "CONFIG_PACKAGE_luci-app-$app_name=y" >> $config_file
 }
 
+function add_apps() { 
+  app_names=$@
+  remove_package $app_names
+  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
+      $app_names
+  for app_name in $app_names; do
+      echo "CONFIG_PACKAGE_$app_name=y" >> $config_file
+  done
+}
+
 function add_daed() {
   add_luci_app daed
   # 添加额外插件
@@ -347,6 +357,10 @@ function add_clashoo() {
   add_luci_app clashoo
 }
 
+function add_daede() {
+  add_apps dae daed luci-app-daede
+}
+
 function add_ghfu() {
   remove_package luci-app-ghfu
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
@@ -371,8 +385,9 @@ update_menu() {
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
-add_dae
-add_daed
+#add_dae
+#add_daed
+add_daede
 add_geodata
 set_theme
 add_nps
