@@ -343,6 +343,10 @@ function add_nikki() {
   add_luci_app nikki
 }
 
+function add_clashoo() {
+  add_luci_app clashoo
+}
+
 function add_ghfu() {
   remove_package luci-app-ghfu
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
@@ -382,6 +386,7 @@ add_taskplan
 add_uugamebooster
 add_ghfu
 add_nikki
+add_clashoo
 # add_msd_lite
 # add_homeproxy
 # add_openlist
