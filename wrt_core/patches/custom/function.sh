@@ -369,6 +369,18 @@ function add_ghfu() {
   echo "CONFIG_PACKAGE_luci-app-ghfu=y" >> $config_file
 }
 
+function theme_shadcn() {
+  add_apps luci-theme-shadcn
+}
+
+function theme_aurora() {
+  add_apps luci-theme-aurora luci-app-aurora-config
+}
+
+function theme_footstrap() {
+  add_apps luci-theme-footstrap
+}
+
 update_menu() {
     local qbittorrent_path="$BASE_PATH/package/luci-app-qbittorrent/luci-app-qbittorrent/root/usr/share/luci/menu.d/luci-app-qbittorrent.json"
     if [ -d "$(dirname "$qbittorrent_path")" ] && [ -f "$qbittorrent_path" ]; then
@@ -431,4 +443,7 @@ add_smartdns
 add_other_package
 update_menu
 add_defaults_settings
+theme_shadcn
+theme_aurora
+theme_footstrap
 generate_config && cat $config_file
