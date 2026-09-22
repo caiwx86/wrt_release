@@ -443,7 +443,7 @@ add_smartdns
 add_other_package
 update_menu
 add_defaults_settings
-theme_shadcn
+#theme_shadcn
 theme_aurora
-theme_footstrap
+#theme_footstrap
 generate_config && cat $config_file
