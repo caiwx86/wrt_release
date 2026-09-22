@@ -247,6 +247,8 @@ function add_adguardhome() {
   # 复制AdGuardHome相关文件
   echo "添加AdGuardHome相关文件"
   cp $CUSTOM_PATCH_DIR/adguard_update_dhcp_leases.sh files/usr/bin/adguard_update_dhcp_leases.sh
+
+  add_apps AdGuardHome luci-app-adguardhome
 }
 
 function add_defaults_settings() {
