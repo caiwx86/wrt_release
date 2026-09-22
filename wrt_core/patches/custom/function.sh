@@ -369,6 +369,10 @@ function add_ghfu() {
   echo "CONFIG_PACKAGE_luci-app-ghfu=y" >> $config_file
 }
 
+function add_oxidns() {
+  add_apps oxidns luci-app-oxidns
+}
+
 function theme_shadcn() {
   add_apps luci-theme-shadcn
 }
@@ -431,6 +435,7 @@ add_wechatpush
 add_taskplan
 add_uugamebooster
 add_ghfu
+add_oxidns
 # add_nikki
 add_clashoo
 # add_msd_lite
