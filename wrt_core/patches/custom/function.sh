@@ -375,6 +375,10 @@ function add_oxidns() {
   add_apps oxidns luci-app-oxidns
 }
 
+function add_lucky() {
+  add_luci_app lucky
+}
+
 function theme_shadcn() {
   add_apps luci-theme-shadcn
 }
