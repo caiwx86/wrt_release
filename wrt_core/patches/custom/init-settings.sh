@@ -48,6 +48,10 @@ else
     echo "$CRON_JOB" >> "$CRON_FILE"
     echo "Cron任务已添加到 $CRON_FILE。"
 fi
+# 设置Cron日志级别为9（详细日志）
+uci set system.@system[0].cronloglevel='9'
+uci commit system
+/etc/init.d/cron restart
 #/etc/init.d/cron start
 #/etc/init.d/cron enable
 # Enable required services
