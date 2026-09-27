@@ -71,9 +71,7 @@ CONFIG_KERNEL_TRANSPARENT_HUGEPAGE_MADVISE=y
 EOF
 }
 
-function kernel_version() {
-  echo $(sed -n 's/^KERNEL_PATCHVER:=\(.*\)/\1/p' target/linux/qualcommax/Makefile)
-}
+kernel_version() { echo $(sed -n 's/^KERNEL_PATCHVER:=\(.*\)/\1/p' target/linux/qualcommax/Makefile); }
 
 function set_kernel_size() {
   #修改jdc ax1800 pro 的内核大小为12M
@@ -171,20 +169,6 @@ function add_apps() {
   done
 }
 
-function add_daed() {
-  add_luci_app daed
-  # 添加额外插件
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      vmlinux-btf
-  
-  #修复daed/Makefile
-  #rm -rf luci-app-daed/daed/Makefile && cp -r $GITHUB_WORKSPACE/patches/daed/Makefile luci-app-daed/daed/
-  sed -i 's/pnpm install ; \\/pnpm install --no-frozen-lockfile ; \\/g'  $BASE_PATH/package/daed/Makefile
-  sed -i 's|github.com/daeuniverse/quic-go|github.com/olicesx/quic-go|g' $BASE_PATH/package/daed/Makefile
-  sed -i 's|/run/i\\  procd_set_param|/procd_set_param command/i \\\tprocd_set_param|g' $BASE_PATH/package/daed/luci-app-daed/root/etc/init.d/luci_daed
-  #cat luci-app-daed/daed/Makefile
-}
-
 function set_theme() {
   remove_package luci-app-argon-config luci-theme-argon 
   git_sparse_clone openwrt-25.12 https://github.com/sbwml/luci-theme-argon \
@@ -202,19 +186,6 @@ function set_theme() {
      find "package/luci-theme-argon" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
   fi
 
-}
-
-function add_nps() {
-  add_luci_app npc
-  echo "CONFIG_PACKAGE_npc=y" >> $config_file
-}
-
-function add_watchdog() {
-  add_luci_app watchdog
-}
-
-function add_netdata() {
-  add_luci_app netdata
 }
 
 function add_other_package() {
@@ -271,25 +242,11 @@ function add_defaults_settings() {
 
 }
 
-function add_dae() {
-  add_luci_app dae
-}
-
 function add_geodata() {
   remove_package v2ray-geodata
   cp -rv $CUSTOM_PATCH_DIR/package/v2ray-geodata ./package/
   echo "CONFIG_PACKAGE_v2ray-geodata-updater=y" >> $config_file
   echo "CONFIG_PACKAGE_v2ray-geodata=y" >> $config_file
-}
-
-function add_mosdns() {
-  add_luci_app mosdns
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      geo2txt
-}
-
-function add_homeproxy() { 
-  add_luci_app homeproxy
 }
 
 function add_netspeedtest() {
@@ -308,58 +265,6 @@ function add_wechatpush(){
   echo "CONFIG_PACKAGE_luci-app-wechatpush=y" >> $config_file
 }
 
-function add_taskplan() {
-  remove_package luci-app-taskplan
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-taskplan
-  echo "CONFIG_PACKAGE_luci-app-taskplan=y" >> $config_file
-}
-
-function add_msd_lite() { 
-  add_luci_app msd_lite
-}
-
-function add_turboacc() {
-  remove_package luci-app-turboacc
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-turboacc 
-}
-
-function add_qbittorrent() {
-  remove_package luci-app-qbittorrent
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      luci-app-qbittorrent
-  echo "CONFIG_PACKAGE_luci-app-qbittorrent=y" >> $config_file
-}
-
-function add_transmission() {
-  add_luci_app transmission
-}
-
-function add_openlist() {
-  add_luci_app openlist2
-}
-
-function add_smartdns() {
-  add_luci_app smartdns
-}
-
-function add_uugamebooster() {
-  add_luci_app uugamebooster
-}
-
-function add_nikki() {
-  add_luci_app nikki
-}
-
-function add_clashoo() {
-  add_luci_app clashoo
-}
-
-function add_daede() {
-  add_apps dae daed luci-app-daede
-}
-
 function add_ghfu() {
   remove_package luci-app-ghfu
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
@@ -367,23 +272,6 @@ function add_ghfu() {
   sed -i 's|smallprogram/OpenWrtAction|caiwx86/wrt_release|g' $BASE_PATH/package/luci-app-ghfu/root/etc/config/ghfu
   sed -i "s|set ghfu.main.github_repo='smallprogram/OpenWrtAction'|set ghfu.main.github_repo='caiwx86/wrt_release'|g" $PATH/package/luci-app-ghfu/root/etc/uci-defaults/99-ghfu-defaults
   echo "CONFIG_PACKAGE_luci-app-ghfu=y" >> $config_file
-}
-
-function add_oxidns() {
-  add_apps oxidns luci-app-oxidns
-  echo "CONFIG_PACKAGE_oxidns-webui=y" >> $config_file
-}
-
-function theme_shadcn() {
-  add_apps luci-theme-shadcn
-}
-
-function theme_aurora() {
-  add_apps luci-theme-aurora luci-app-aurora-config
-}
-
-function theme_footstrap() {
-  add_apps luci-theme-footstrap
 }
 
 update_menu() {
@@ -421,35 +309,33 @@ update_menu() {
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
-#add_dae
-#add_daed
-add_daede
-add_geodata
-set_theme
-add_nps
-add_watchdog
-add_mosdns
-add_netdata
 add_adguardhome
+set_theme
+add_geodata
 add_netspeedtest
 add_wechatpush
-add_taskplan
-add_uugamebooster
 add_ghfu
-add_oxidns
-# add_nikki
-add_clashoo
-# add_msd_lite
-# add_homeproxy
-# add_openlist
-# add_turboacc
-# add_qbittorrent
-# add_transmission
-add_smartdns
+add_daede() { add_apps dae daed luci-app-daede; }; add_daede
+add_nps() { add_luci_app npc; echo "CONFIG_PACKAGE_npc=y" >> $config_file; }; add_nps
+add_watchdog() { add_luci_app watchdog; }; add_watchdog
+add_mosdns() { add_luci_app mosdns; add_apps geo2txt; }; add_mosdns
+add_netdata() { add_luci_app netdata; }; add_netdata
+add_taskplan() { add_apps luci-app-taskplan; }; add_taskplan
+add_uugamebooster() { add_luci_app uugamebooster; }; add_uugamebooster
+add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $config_file; }; add_oxidns
+# add_nikki() { add_luci_app nikki; }; add_nikki
+add_clashoo() { add_luci_app clashoo; }; add_clashoo
+# add_msd_lite() { add_luci_app msd_lite;  }; add_msd_lite
+# add_homeproxy() { add_luci_app homeproxy;  }; add_homeproxy
+# add_openlist() { add_luci_app openlist2;  }; add_openlist
+# add_turboacc() { add_apps luci-app-turboacc;  }; add_turboacc
+# add_qbittorrent() { add_apps luci-app-qbittorrent;  }; add_qbittorrent
+# add_transmission() { add_luci_app transmission; }; add_transmission
+add_smartdns() { add_luci_app smartdns; }; add_smartdns
+# theme_shadcn()  { add_luci_app shadcn-theme; }; theme_shadcn
+theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
+# theme_footstrap() { add_apps luci-theme-footstrap; }; theme_footstrap
 add_other_package
 update_menu
 add_defaults_settings
-#theme_shadcn
-theme_aurora
-#theme_footstrap
 generate_config && cat $config_file
