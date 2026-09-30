@@ -1,5 +1,5 @@
 name: Release WRT
-run-name: Release - ${{ github.event.inputs.model || 'auto' }}
+run-name: Release - ${{ github.event.inputs.model || 'jdcloud_ipq60xx_libwrt' }} 
 
 on:
   workflow_dispatch:
