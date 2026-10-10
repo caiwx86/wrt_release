@@ -1,5 +1,5 @@
 name: Release WRT
-run-name: Release - ${{ github.event.inputs.model || 'auto' }}
+run-name: Release - ${{ github.event.inputs.model || 'jdcloud_ipq60xx_libwrt' }} 
 
 on:
   workflow_dispatch:
@@ -49,6 +49,9 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write   # softprops/action-gh-release 需要
+      actions: write    # gh cache delete 需要
     steps:
       - name: Install BC
         env:
@@ -105,16 +108,20 @@ jobs:
       - name: Pre Clone
         run: ./wrt_core/pre_clone_action.sh ${{ env.MODEL }}
 
+      - name: Set Cache Key Prefix
+        run: |
+          echo "CACHE_PREFIX=${{ matrix.os }}-${{ env.MODEL }}-${{ hashFiles('**/repo_flag') }}" >> $GITHUB_ENV
+
       - name: Cache Dependencies
         uses: actions/cache@v6.1.0
         with:
           path: |
             ./action_build/.ccache
             ./action_build/staging_dir
-          key: ${{ matrix.os }}-${{ inputs.model }}-${{ hashFiles('**/repo_flag') }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-${{ env.BUILD_DATE }}
+          key: ${{ env.CACHE_PREFIX }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-${{ env.BUILD_DATE }}
           restore-keys: |
-            ${{ matrix.os }}-${{ inputs.model }}-${{ hashFiles('**/repo_flag') }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-
-            ${{ matrix.os }}-${{ inputs.model }}-${{ hashFiles('**/repo_flag') }}-
+            ${{ env.CACHE_PREFIX }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-
+            ${{ env.CACHE_PREFIX }}-
 
       - name: Refresh the cache
         run: |
@@ -165,7 +172,7 @@ jobs:
       - name: Delete Old Cache
         run: |
           # 获取缓存列表并删除
-          gh cache list --key ${{ matrix.os }}-${{ inputs.model }}-${{ hashFiles('**/repo_flag') }}- --json key --jq '.[] | .key' | while read -r key; do
+          gh cache list --key "${{ env.CACHE_PREFIX }}-" --json key --jq '.[] | .key' | while read -r key; do
             gh cache delete "$key"
           done
           # 输出缓存状态
@@ -220,7 +227,7 @@ jobs:
           fi
 
           kmod_count=$(wc -l < "$KMOD_LIST" | tr -d '[:space:]')
-          archive_name="kmods_${{ inputs.model }}_${KVER:-unknown-kernel}_${BUILD_DATE}.tar.gz"
+          archive_name="kmods_${{ env.MODEL }}_${KVER:-unknown-kernel}_${BUILD_DATE}.tar.gz"
           tar -C ./action_build/bin -czf "$archive_name" -T "$KMOD_LIST"
 
           echo "KMOD_ARCHIVE=$archive_name" >> "$GITHUB_ENV"
