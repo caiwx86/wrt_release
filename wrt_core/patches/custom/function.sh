@@ -316,6 +316,7 @@ add_netspeedtest
 add_wechatpush
 add_ghfu
 add_daede() { add_apps dae daed luci-app-daede; }; add_daede
+add_honk() { add_luci_app honk; }; add_honk
 add_nps() { add_luci_app npc; echo "CONFIG_PACKAGE_npc=y" >> $config_file; }; add_nps
 add_watchdog() { add_luci_app watchdog; }; add_watchdog
 add_mosdns() { add_luci_app mosdns; add_apps geo2txt; }; add_mosdns
