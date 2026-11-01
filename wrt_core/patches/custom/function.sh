@@ -218,6 +218,8 @@ function add_adguardhome() {
   # 复制AdGuardHome相关文件
   echo "添加AdGuardHome相关文件"
   cp $CUSTOM_PATCH_DIR/adguard_update_dhcp_leases.sh files/usr/bin/adguard_update_dhcp_leases.sh
+
+  add_apps luci-app-adguardhome
 }
 
 function add_defaults_settings() {
@@ -228,7 +230,6 @@ function add_defaults_settings() {
   cp $CUSTOM_PATCH_DIR/init-settings.sh files/etc/uci-defaults/99-init-settings
 
   # 配置AdGuardHome相关文件
-  find_replace $CUSTOM_PATCH_DIR/etc/config/AdGuardHome             luci-app-adguardhome/root/etc/config
   find_replace $CUSTOM_PATCH_DIR/etc/AdGuardHome.yaml               luci-app-adguardhome/root/etc
    
   # 配置mosdns相关文件
