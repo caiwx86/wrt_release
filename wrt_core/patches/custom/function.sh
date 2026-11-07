@@ -335,7 +335,7 @@ add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $con
 # add_transmission() { add_luci_app transmission; }; add_transmission
 # add_smartdns() { add_luci_app smartdns; }; add_smartdns
 # theme_shadcn()  { add_luci_app shadcn-theme; }; theme_shadcn
-theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
+# theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
 # theme_footstrap() { add_apps luci-theme-footstrap; }; theme_footstrap
 add_other_package
 update_menu
