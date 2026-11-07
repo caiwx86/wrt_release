@@ -326,14 +326,14 @@ add_taskplan() { add_apps luci-app-taskplan; }; add_taskplan
 add_uugamebooster() { add_luci_app uugamebooster; }; add_uugamebooster
 add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $config_file; }; add_oxidns
 # add_nikki() { add_luci_app nikki; }; add_nikki
-add_clashoo() { add_luci_app clashoo; }; add_clashoo
+# add_clashoo() { add_luci_app clashoo; }; add_clashoo
 # add_msd_lite() { add_luci_app msd_lite;  }; add_msd_lite
 # add_homeproxy() { add_luci_app homeproxy;  }; add_homeproxy
 # add_openlist() { add_luci_app openlist2;  }; add_openlist
 # add_turboacc() { add_apps luci-app-turboacc;  }; add_turboacc
 # add_qbittorrent() { add_apps luci-app-qbittorrent;  }; add_qbittorrent
 # add_transmission() { add_luci_app transmission; }; add_transmission
-add_smartdns() { add_luci_app smartdns; }; add_smartdns
+# add_smartdns() { add_luci_app smartdns; }; add_smartdns
 # theme_shadcn()  { add_luci_app shadcn-theme; }; theme_shadcn
 theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
 # theme_footstrap() { add_apps luci-theme-footstrap; }; theme_footstrap
