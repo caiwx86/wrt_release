@@ -159,14 +159,6 @@ fix_mkpkg_format_invalid() {
         if [ -f "$custom_feed_worktree_dir/luci-app-openclash/Makefile" ]; then
             sed -i 's/PKG_RELEASE:=beta/PKG_RELEASE:=1/g' "$custom_feed_worktree_dir/luci-app-openclash/Makefile"
         fi
-        if [ -f "$custom_feed_worktree_dir/luci-app-quickstart/Makefile" ]; then
-            sed -i 's/PKG_VERSION:=0\.8\.16-1/PKG_VERSION:=0\.8\.16/g' "$custom_feed_worktree_dir/luci-app-quickstart/Makefile"
-            sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$custom_feed_worktree_dir/luci-app-quickstart/Makefile"
-        fi
-        if [ -f "$custom_feed_worktree_dir/luci-app-store/Makefile" ]; then
-            sed -i 's/PKG_VERSION:=0\.1\.27-1/PKG_VERSION:=0\.1\.27/g' "$custom_feed_worktree_dir/luci-app-store/Makefile"
-            sed -i 's/PKG_RELEASE:=$/PKG_RELEASE:=1/g' "$custom_feed_worktree_dir/luci-app-store/Makefile"
-        fi
     fi
 }
 
@@ -185,55 +177,6 @@ update_tcping() {
 }
 
 
-apply_passwall_smartdns_patch() {
-    local package_dir="$(get_custom_feed_worktree_dir)/luci-app-passwall"
-    local patch_files=(
-        "$BASE_PATH/patches/passwall-smartdns-custom-conf.patch"
-        "$BASE_PATH/patches/passwall-smartdns-ui-cleanup.patch"
-        "$BASE_PATH/patches/passwall-smartdns-runtime.patch"
-        "$BASE_PATH/patches/passwall-smartdns-loop-guard.patch"
-    )
-    local patch_file
-
-    if [ ! -d "$package_dir" ]; then
-        echo "错误：未找到 luci-app-passwall 源码目录：$package_dir" >&2
-        return 1
-    fi
-
-    for patch_file in "${patch_files[@]}"; do
-        if [ ! -f "$patch_file" ]; then
-            echo "错误：未找到 Passwall patch：$patch_file" >&2
-            return 1
-        fi
-        if ! (cd "$package_dir" && patch --dry-run --batch --fuzz=0 -p1 < "$patch_file" >/dev/null); then
-            echo "错误：Passwall patch 无法应用，可能是上游源码已变化：$patch_file" >&2
-            return 1
-        fi
-        if ! (cd "$package_dir" && patch --batch --fuzz=0 -p1 < "$patch_file" >/dev/null); then
-            echo "错误：应用 Passwall patch 失败：$patch_file" >&2
-            return 1
-        fi
-    done
-    echo "已应用 Passwall SmartDNS custom.conf、UI cleanup、runtime 和 loop guard patch。"
-}
-
-
-apply_passwall_tweaks() {
-    apply_passwall_smartdns_patch || return 1
-
-    local chnlist_path="$(get_custom_feed_worktree_dir)/luci-app-passwall/root/usr/share/passwall/rules/chnlist"
-    if [ -f "$chnlist_path" ]; then
-        >"$chnlist_path"
-    fi
-
-    local xray_util_path="$(get_custom_feed_worktree_dir)/luci-app-passwall/luasrc/passwall/util_xray.lua"
-    if [ -f "$xray_util_path" ]; then
-        sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
-        sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
-    fi
-}
-
-
 update_mosdns_deconfig() {
     local mosdns_conf="$(get_custom_feed_worktree_dir)/luci-app-mosdns/root/etc/config/mosdns"
     if [ -d "${mosdns_conf%/*}" ] && [ -f "$mosdns_conf" ]; then
@@ -243,28 +186,26 @@ update_mosdns_deconfig() {
 }
 
 
-fix_quickstart() {
-    local file_path="$(get_custom_feed_worktree_dir)/luci-app-quickstart/luasrc/controller/istore_backend.lua"
-    local makefile_path="$(get_custom_feed_worktree_dir)/quickstart/Makefile"
-    local url="https://gist.githubusercontent.com/puteulanus/1c180fae6bccd25e57eb6d30b7aa28aa/raw/istore_backend.lua"
-    if [ -f "$file_path" ]; then
-        echo "正在修复 quickstart..."
-        if ! curl_retry -fsSL -o "$file_path" "$url"; then
-            echo "错误：从 $url 下载 istore_backend.lua 失败" >&2
-            exit 1
-        fi
-    fi
+fix_netwiz_permissions() {
+    local package_dir="$(get_custom_feed_worktree_dir)/luci-app-netwiz"
+    local relative_path
+    local executable_files=(
+        root/usr/libexec/rpcd/netwiz root/usr/libexec/rpcd/netwiz_dev
+        root/usr/libexec/netwiz-autodetect.sh root/usr/libexec/netwiz-monitor-loop.sh
+        root/etc/init.d/netwiz-monitor root/etc/init.d/netwiz-recovery
+        root/etc/init.d/netwiz-watchdog root/etc/hotplug.d/dhcp/99-netwiz-guard
+    )
 
-    if [ -f "$makefile_path" ]; then
-        echo "正在移除 quickstart 非必要存储依赖..."
-        sed -i \
-            -e '/^[[:space:]]*DEPENDS:=/,/^[[:space:]]*URL:=/ s/[[:space:]]*+smartmontools-drivedb//g' \
-            -e '/^[[:space:]]*DEPENDS:=/,/^[[:space:]]*URL:=/ s/[[:space:]]*+smartmontools//g' \
-            -e '/^[[:space:]]*DEPENDS:=/,/^[[:space:]]*URL:=/ s/[[:space:]]*+mdadm//g' \
-            -e '/^[[:space:]]*DEPENDS:=/,/^[[:space:]]*URL:=/ s/[[:space:]]*+parted//g' \
-            -e '/^[[:space:]]*DEPENDS:=/,/^[[:space:]]*URL:=/ s/[[:space:]]*+e2fsprogs//g' \
-            "$makefile_path"
-    fi
+    for relative_path in "${executable_files[@]}"; do
+        if [ ! -f "$package_dir/$relative_path" ]; then
+            echo "错误：luci-app-netwiz 执行文件不存在：$package_dir/$relative_path" >&2
+            return 1
+        fi
+        if ! chmod 755 "$package_dir/$relative_path"; then
+            echo "错误：无法设置 luci-app-netwiz 执行权限：$package_dir/$relative_path" >&2
+            return 1
+        fi
+    done
 }
 
 
