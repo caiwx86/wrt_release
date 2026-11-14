@@ -324,7 +324,7 @@ update_menu() {
 # 解决配置文件未换行问题
 echo "" >> $config_file
 add_adguardhome
-set_theme
+# set_theme
 add_geodata
 add_netspeedtest
 add_wechatpush
@@ -350,6 +350,7 @@ add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $con
 # theme_shadcn()  { add_luci_app shadcn-theme; }; theme_shadcn
 # theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
 # theme_footstrap() { add_apps luci-theme-footstrap; }; theme_footstrap
+remove_package luci-app-argon-config luci-app-oaf luci-app-pbr luci-app-vlmcsd
 add_other_package
 update_menu
 add_defaults_settings
