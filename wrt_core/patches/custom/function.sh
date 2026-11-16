@@ -23,7 +23,7 @@ CONFIG_BPF_SYSCALL=y
 CONFIG_BPF_JIT=y
 CONFIG_CGROUPS=y
 CONFIG_CGROUP_BPF=y
-# CONFIG_NET_SCHED=y
+CONFIG_NET_SCHED=y
 CONFIG_NET_XGRESS=y
 CONFIG_NET_NS=y
 CONFIG_KPROBES=y
@@ -55,8 +55,8 @@ CONFIG_DYNAMIC_FTRACE=y
 CONFIG_NF_TABLES=y
 CONFIG_NF_TABLES_INET=y
 CONFIG_NFT_CT=y
-# CONFIG_NFT_QUEUE=y
-# CONFIG_NETFILTER_NETLINK_QUEUE=y
+CONFIG_NFT_QUEUE=m
+CONFIG_NETFILTER_NETLINK_QUEUE=m
 EOF
     echo "cat_kernel_config to $1 done"
   fi
@@ -138,23 +138,44 @@ function git_sparse_clone() {
 }
 
 # 删除指定软件包
-function remove_package() {
-   packages="$@"
-   for package in $packages; do 
-      pkg_path=$(find . -type d -name "$package")
-      if [[ ! "$pkg_path" == "" ]]; then
-         rm -rvf $pkg_path
-      fi
-   done
+remove_package() {
+    cd $BASE_PATH
+    local pkg dir r i any roots=${PKG_ROOTS:-package feeds custom_feed}
+    local -a hits
+
+    for pkg in "$@"; do
+        case $pkg in
+            ''|[!A-Za-z0-9]*|*[!A-Za-z0-9._+-]*) printf '非法包名: %q\n' "$pkg" >&2; continue ;;
+        esac
+
+        any=0; for r in $roots; do [ -d "$r" ] && any=1; done
+        [ "$any" = 1 ] || { printf '没有 %s, 请 cd 到 OpenWrt 顶层或设 PKG_ROOTS\n' "$roots" >&2; return 1; }
+
+        hits=()
+        for r in $roots; do
+            [ -d "$r" ] || continue
+            while IFS= read -r -d '' dir; do
+                [ -f "$dir/Makefile" ] && hits+=("$dir")
+            done < <(find "$r/" -type d -name "$pkg" -print0 2>/dev/null)
+        done
+
+        [ ${#hits[@]} -gt 0 ] || { printf '  - %s 未找到\n' "$pkg"; continue; }
+
+        for ((i = ${#hits[@]} - 1; i >= 0; i--)); do        # 深 → 浅
+            dir=${hits[i]}; [ -d "$dir" ] || continue
+            printf '删除: %s\n' "$dir"; rm -rf -- "$dir"
+        done
+    done
 }
 
 # 查找软件包中文件并替换
 # $1: 文件夹路径
 # $2: 文件匹配字符串
 function find_replace() {
+    cd $BASE_PATH
     file_path=$1
     package=$2
-    pkg_path=$(find . -type d | grep "$package$")
+    pkg_path=$(find package feeds custom_feed -type d | grep "$package$")
     if [[ ! "$pkg_path" == "" ]]; then
         for dir_path in $pkg_path; do 
           cp -rv $file_path $pkg_path
@@ -164,7 +185,8 @@ function find_replace() {
 }
 
 # 添加软件包
-function add_luci_app() { 
+function add_luci_app() {
+  cd $BASE_PATH
   app_name=$1
   remove_package $app_name luci-app-$app_name
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
@@ -172,7 +194,8 @@ function add_luci_app() {
   echo "CONFIG_PACKAGE_luci-app-$app_name=y" >> $config_file
 }
 
-function add_apps() { 
+function add_apps() {
+  cd $BASE_PATH
   app_names=$@
   remove_package $app_names
   git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
@@ -180,25 +203,6 @@ function add_apps() {
   for app_name in $app_names; do
       echo "CONFIG_PACKAGE_$app_name=y" >> $config_file
   done
-}
-
-function set_theme() {
-  remove_package luci-app-argon-config luci-theme-argon 
-  git_sparse_clone openwrt-25.12 https://github.com/sbwml/luci-theme-argon \
-     luci-app-argon-config luci-theme-argon 
-  # 添加argon主题配置
-  echo "CONFIG_PACKAGE_luci-app-argon-config=y" >> $config_file
-  echo "CONFIG_PACKAGE_luci-theme-argon=y" >> $config_file
-
-  argon_css_file=$(find ./package/luci-theme-argon/ -type f -name "cascade.css")
-  #修改字体
-  sed -i "/^.main .main-left .nav li a {/,/^}/ { /font-weight: bolder/d }" $argon_css_file
-  sed -i '/^\[data-page="admin-system-opkg"\] #maincontent>.container {/,/}/ s/font-weight: 600;/font-weight: normal;/' $argon_css_file
-
-  if [ -d "package/luci-theme-argon" ]; then
-     find "package/luci-theme-argon" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
-  fi
-
 }
 
 function add_other_package() {
@@ -232,7 +236,8 @@ function add_adguardhome() {
   echo "添加AdGuardHome相关文件"
   cp $CUSTOM_PATCH_DIR/adguard_update_dhcp_leases.sh files/usr/bin/adguard_update_dhcp_leases.sh
 
-  add_apps luci-app-adguardhome
+  add_luci_app adguardhome
+  # add_apps adguardhome luci-app-adguardhome-tk && remove_package luci-app-adguardhome
 }
 
 function add_defaults_settings() {
@@ -245,12 +250,6 @@ function add_defaults_settings() {
   # 配置AdGuardHome相关文件
   find_replace $CUSTOM_PATCH_DIR/etc/AdGuardHome.yaml               luci-app-adguardhome/root/etc
    
-  # 配置mosdns相关文件
-  find_replace $CUSTOM_PATCH_DIR/etc/config/mosdns                  luci-app-mosdns/root/etc/config
-  find_replace $CUSTOM_PATCH_DIR/etc/mosdns/config_custom.yaml      luci-app-mosdns/root/etc/mosdns
-  find_replace $CUSTOM_PATCH_DIR/etc/mosdns/dat_exec.yaml           luci-app-mosdns/root/etc/mosdns
-  find_replace $CUSTOM_PATCH_DIR/etc/mosdns/dns.yaml                luci-app-mosdns/root/etc/mosdns
-
   # 配置smartdns相关文件
   find_replace $CUSTOM_PATCH_DIR/etc/config/smartdns                smartdns/conf/smartdns.conf 
 
@@ -288,52 +287,19 @@ function add_ghfu() {
   echo "CONFIG_PACKAGE_luci-app-ghfu=y" >> $config_file
 }
 
-update_menu() {
-    local qbittorrent_path="$BASE_PATH/package/luci-app-qbittorrent/luci-app-qbittorrent/root/usr/share/luci/menu.d/luci-app-qbittorrent.json"
-    if [ -d "$(dirname "$qbittorrent_path")" ] && [ -f "$qbittorrent_path" ]; then
-        sed -i 's/nas/services/g' "$qbittorrent_path"
-    fi
-
-    local transmission_path="$BASE_PATH/package/luci-app-transmission/root/usr/share/luci/menu.d/luci-app-transmission.json"
-    if [ -d "$(dirname "$transmission_path")" ] && [ -f "$transmission_path" ]; then
-        sed -i 's/nas/services/g' "$transmission_path"
-    fi
-
-    local upnp_path="$BASE_PATH/feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/luci-app-upnp.json"
-    if [ -d "$(dirname "$upnp_path")" ] && [ -f "$upnp_path" ]; then
-        sed -i 's/services/network/g' "$upnp_path"
-    fi
-
-    local emmc-health_path="$BASE_PATH/custom_feed/luci-app-emmc-health/root/usr/share/luci/menu.d/luci-app-emmc-health.json"
-    if [ -d "$(dirname "${emmc-health_path}")" ] && [ -f "${emmc-health_path}" ]; then
-        sed -i 's/services/network/g' "${emmc-health_path}"
-    fi
-
-    local samba4_path="$BASE_PATH/feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/luci-app-samba4.json"
-    if [ -d "$(dirname "${samba4_path}")" ] && [ -f "${samba4_path}" ]; then
-        sed -i 's/services/network/g' "${samba4_path}"
-    fi
-
-    local npc_path="$BASE_PATH/package/luci-app-npc/root/usr/share/luci/menu.d/luci-app-npc.json"
-    if [ -d "$(dirname "${npc_path}")" ] && [ -f "${npc_path}" ]; then
-        sed -i 's/services/vpn/g' "${npc_path}"
-    fi
-  }
-
 # 主要执行程序
 # 解决配置文件未换行问题
 echo "" >> $config_file
 add_adguardhome
-# set_theme
 add_geodata
 add_netspeedtest
 add_wechatpush
 add_ghfu
 # add_daede() { add_apps dae daed luci-app-daede; }; add_daede
 add_honk() { add_luci_app honk; }; add_honk
-add_nps() { add_luci_app npc; echo "CONFIG_PACKAGE_npc=y" >> $config_file; }; add_nps
+add_nps() { add_luci_app npc; remove_package nps; echo "CONFIG_PACKAGE_npc=y" >> $config_file; }; add_nps
 add_watchdog() { add_luci_app watchdog; }; add_watchdog
-add_mosdns() { add_luci_app mosdns; add_apps geo2txt; }; add_mosdns
+# add_mosdns() { add_luci_app mosdns; add_apps geo2txt; }; add_mosdns
 add_netdata() { add_luci_app netdata; }; add_netdata
 add_taskplan() { add_apps luci-app-taskplan; }; add_taskplan
 add_uugamebooster() { add_luci_app uugamebooster; }; add_uugamebooster
@@ -350,8 +316,9 @@ add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $con
 # theme_shadcn()  { add_luci_app shadcn-theme; }; theme_shadcn
 # theme_aurora() { add_apps luci-theme-aurora luci-app-aurora-config; }; theme_aurora
 # theme_footstrap() { add_apps luci-theme-footstrap; }; theme_footstrap
-remove_package luci-app-argon-config luci-app-oaf luci-app-pbr luci-app-vlmcsd
+remove_package luci-app-argon-config luci-app-oaf luci-app-pbr luci-app-vlmcsd luci-app-mosdns mosdns
+remove_package cups luci-app-cupsd
 add_other_package
-update_menu
+set_menu() { bash $CUSTOM_PATCH_DIR/menu-reorg.sh;}; set_menu
 add_defaults_settings
 generate_config && cat $config_file

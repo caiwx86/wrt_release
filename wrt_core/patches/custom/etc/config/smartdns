@@ -5,10 +5,10 @@ config smartdns
 	option prefetch_domain '1'
 	option serve_expired '1'
 	option tcp_server '0'
-	option seconddns_tcp_server '1'
+	option seconddns_tcp_server '0'
 	option port '6053'
 	option ipv6_server '0'
-	option seconddns_server_group 'gfw'
+	option seconddns_server_group 'GFW'
 	option cache_size '20000'
 	option rr_ttl '3600'
 	option rr_ttl_min '5'
@@ -24,6 +24,7 @@ config smartdns
 	option enabled '1'
 	option response_mode 'fastest-response'
 	option mdns_lookup '1'
+	option seconddns_enabled '1'
 	option old_port '6053'
 	option old_enabled '1'
 	option old_auto_set_dnsmasq '0'
@@ -69,22 +70,17 @@ config server
 
 config server
 	option enabled '1'
-	option name '360lt'
-	option ip '123.125.81.6'
-	option type 'udp'
-	option server_group 'CN'
-
-config server
-	option enabled '1'
 	option name 'cloudflare'
-	option ip '1.1.1.1'
-	option type 'udp'
+	option ip 'https://1.1.1.1/dns-query'
+	option type 'https'
 	option server_group 'GFW'
+	option exclude_default_group '1'
 
 config server
 	option enabled '1'
 	option name 'google'
-	option ip '8.8.4.4'
-	option type 'udp'
+	option ip 'https://8.8.8.8/dns-query'
+	option type 'https'
 	option server_group 'GFW'
+	option exclude_default_group '1'
 
