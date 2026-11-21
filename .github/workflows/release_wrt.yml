@@ -49,7 +49,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write   # softprops/action-gh-release 需要
@@ -76,20 +76,9 @@ jobs:
 
       - name: Checkout Projects
         uses: actions/checkout@main
-      - name: Initialization Environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo -E apt -yqq purge firefox
-          sudo -E apt -yqq update
-          sudo -E apt -yqq full-upgrade
-          sudo -E apt -yqq autoremove --purge
-          sudo -E apt -yqq autoclean
-          sudo -E apt -yqq clean
-          sudo -E apt -yqq install dos2unix python3-netifaces libfuse-dev
-          sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-          sudo -E systemctl daemon-reload
-          sudo -E timedatectl set-timezone "Asia/Shanghai"
+
+      - name: Build System Setup
+        run: sudo bash wrt_core/setup_ci_environment.sh
 
       - name: Set Build Date and Timezone
         env:
