@@ -1,5 +1,4 @@
 #!/bin/bash
-
 config_file=".config"
 CUSTOM_PATCH_DIR="$GITHUB_WORKSPACE/wrt_core/patches/custom"
 BASE_PATH=$1
@@ -184,25 +183,91 @@ function find_replace() {
     fi 
 }
 
-# 添加软件包
-function add_luci_app() {
-  cd $BASE_PATH
-  app_name=$1
-  remove_package $app_name luci-app-$app_name
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      $app_name luci-app-$app_name
-  echo "CONFIG_PACKAGE_luci-app-$app_name=y" >> $config_file
+_la_log() { printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$*"; }
+
+# 内部: 一次克隆 + 逐包写配置; 参数是最终要装的包名(已去重)
+_la_install() {
+	local pkg d ver cfg rm_yes="" nfound=0
+	local t0=$SECONDS
+	local -a pkgs=("$@")
+
+	[ $# -gt 0 ] || return 0
+	if [ -z "${CUSTOM_OP:-}" ] || [ -z "${CUSTOM_OP_BRANCH:-}" ]; then
+		_la_log "CUSTOM_OP / CUSTOM_OP_BRANCH 未设置" >&2
+		return 2
+	fi
+	cfg=${config_file:-.config}
+	cd "${BASE_PATH:-}" 2>/dev/null || { _la_log "进不去 BASE_PATH=${BASE_PATH:-<空>}" >&2; return 2; }
+
+	_la_log "==> ${pkgs[*]}  源: $CUSTOM_OP  分支: $CUSTOM_OP_BRANCH"
+	[ "${LOG_LEVEL:-info}" = debug ] && _la_log "[debug] git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP ${pkgs[*]}"
+
+	# 新版 remove-package.sh 非交互环境必须 -y, 老版本没有该选项
+	declare -f remove_package 2>/dev/null | grep -q -- '--yes' && rm_yes="-y"
+	remove_package ${rm_yes:+"$rm_yes"} "${pkgs[@]}" >/dev/null 2>&1 || true
+
+	# 一次克隆所有包(批量比逐个快); 失败就整批不写配置
+	if ! git_sparse_clone "$CUSTOM_OP_BRANCH" "$CUSTOM_OP" "${pkgs[@]}"; then
+		_la_log "!! 拉取失败, 未写配置" >&2
+		return 1
+	fi
+
+	for pkg in "${pkgs[@]}"; do
+		d=$(find package -maxdepth 3 -type d -name "$pkg" -print -quit 2>/dev/null)
+		ver=""
+		if [ -n "$d" ]; then
+			nfound=$((nfound + 1))
+			ver=$(sed -nE 's/^[[:space:]]*PKG_VERSION[[:space:]]*[:+]?=[[:space:]]*//p' "$d/Makefile" 2>/dev/null | head -n 1)
+			_la_log "✔ $d  (v${ver:-?})"
+		else
+			_la_log "! 没找到 package/**/$pkg (仍写入配置)" >&2
+		fi
+
+		# 去重: 已有 =y 就不再追加
+		if grep -qxF "CONFIG_PACKAGE_$pkg=y" "$cfg" 2>/dev/null; then
+			_la_log "= CONFIG_PACKAGE_$pkg=y 已存在"
+		else
+			printf 'CONFIG_PACKAGE_%s=y\n' "$pkg" >>"$cfg" || { _la_log "!! 写入 $cfg 失败" >&2; return 1; }
+			_la_log "+ CONFIG_PACKAGE_$pkg=y"
+		fi
+	done
+
+	[ "$nfound" -gt 0 ] || { _la_log "!! ${#pkgs[@]} 个包都没落地, 检查源/分支" >&2; return 1; }
+	_la_log "完成 ${#pkgs[@]} 个, 用时 $((SECONDS - t0))s"
 }
 
-function add_apps() {
-  cd $BASE_PATH
-  app_names=$@
-  remove_package $app_names
-  git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP \
-      $app_names
-  for app_name in $app_names; do
-      echo "CONFIG_PACKAGE_$app_name=y" >> $config_file
-  done
+# 按原样安装: 传什么装什么; 传 luci-app-x 时顺带装 x
+add_apps() {
+	local p q seen=" "
+	local -a want=()
+
+	[ $# -gt 0 ] || { _la_log "add_apps: 缺少包名" >&2; return 2; }
+	for p in "$@"; do
+		[ -n "$p" ] || { _la_log "add_apps: 有空包名" >&2; return 2; }
+		case $seen in *" $p "*) continue ;; esac
+		seen="$seen$p "
+		want+=("$p")
+		case $p in
+			luci-app-*)
+				q="${p#luci-app-}"
+				case $seen in *" $q "*) ;; *) seen="$seen$q "; want+=("$q") ;; esac
+				;;
+		esac
+	done
+	_la_install "${want[@]}"
+}
+
+# 添加 luci 应用: 短名/全名都算, 统一装 luci-app-x 和 x
+add_luci_app() {
+	local p
+	local -a want=()
+
+	[ $# -gt 0 ] || { _la_log "add_luci_app: 缺少包名" >&2; return 2; }
+	for p in "$@"; do
+		[ -n "$p" ] || { _la_log "add_luci_app: 有空包名" >&2; return 2; }
+		want+=("luci-app-${p#luci-app-}")
+	done
+	add_apps "${want[@]}"
 }
 
 function add_other_package() {
