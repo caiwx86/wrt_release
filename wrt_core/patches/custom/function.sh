@@ -132,7 +132,7 @@ function git_sparse_clone() {
   git clone --depth=1 -b $branch --single-branch --filter=blob:none --sparse $repourl
   repodir=$(echo $repourl | awk -F '/' '{print $(NF)}')
   cd $repodir && git sparse-checkout set $@
-  mv -f $@ $BASE_PATH/package 
+  mv -f $@ $BASE_PATH/package
   cd $BASE_PATH && rm -rf $repodir
 }
 
@@ -197,14 +197,12 @@ _la_install() {
 		return 2
 	fi
 	cfg=${config_file:-.config}
-	cd "${BASE_PATH:-}" 2>/dev/null || { _la_log "进不去 BASE_PATH=${BASE_PATH:-<空>}" >&2; return 2; }
-
+	cd "${BASE_PATH:-}" 2>/dev/null || { _la_log "进不去 BASE_PATH=${BASE_PATH:-<空>}" >&2; return 2; }	
+	
+	remove_package ${pkgs[@]}
+	
 	_la_log "==> ${pkgs[*]}  源: $CUSTOM_OP  分支: $CUSTOM_OP_BRANCH"
 	[ "${LOG_LEVEL:-info}" = debug ] && _la_log "[debug] git_sparse_clone $CUSTOM_OP_BRANCH $CUSTOM_OP ${pkgs[*]}"
-
-	# 新版 remove-package.sh 非交互环境必须 -y, 老版本没有该选项
-	declare -f remove_package 2>/dev/null | grep -q -- '--yes' && rm_yes="-y"
-	remove_package ${rm_yes:+"$rm_yes"} "${pkgs[@]}" >/dev/null 2>&1 || true
 
 	# 一次克隆所有包(批量比逐个快); 失败就整批不写配置
 	if ! git_sparse_clone "$CUSTOM_OP_BRANCH" "$CUSTOM_OP" "${pkgs[@]}"; then
@@ -285,7 +283,7 @@ function add_other_package() {
   ########################### 修改 DNSMASQ 配置 ###########################
   dnsmasq_config=package/network/services/dnsmasq/files/
   # 修改 DNSMASQ 53 端口为 253
-  perl -i -pe 's/option port.*/option port 53/ if /config dnsmasq/../^config/; $_ .= "        option port             253\n" if /option filter_aaaa\t0/ && !/option port/' $dnsmasq_config/dhcp.conf
+  perl -i -pe 's/option port.*/option port 53/ if /config dnsmasq/../^config/; $_ .= "        option port             1253\n" if /option filter_aaaa\t0/ && !/option port/' $dnsmasq_config/dhcp.conf
   # DNSMASQ DNSSERVER
   if [[ -f "$dnsmasq_config/dnsmasq.init" ]]; then
       sed -i 's/DNS_SERVERS=\"\"/DNS_SERVERS=\"223.5.5.5 8.8.4.4\"/g' package/network/services/dnsmasq/files/dnsmasq.init
