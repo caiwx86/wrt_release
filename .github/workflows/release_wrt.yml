@@ -19,6 +19,7 @@ on:
           - jdcloud_ipq60xx_immwrt
           - jdcloud_ipq60xx_libwrt
           - link_nn6000v2_immwrt
+          - linksys_mx4x00_immwrt
           - linksys_mx4x00_libwrt
           - n1_immwrt
           - qihoo_360v6_immwrt
@@ -53,7 +54,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write   # softprops/action-gh-release 需要
-      actions: write    # gh cache delete 需要
     steps:
       - name: Install BC
         env:
@@ -81,46 +81,36 @@ jobs:
         run: sudo bash wrt_core/setup_ci_environment.sh
 
       - name: Set Build Date and Timezone
-        env:
-          RAW_ADD_CONFIG_FRAGMENTS: ${{ inputs.add_fragments }}
-          RAW_REMOVE_CONFIG_FRAGMENTS: ${{ inputs.remove_fragments }}
         run: |
           sudo -E timedatectl set-timezone "Asia/Shanghai"
           export BUILD_DATE=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
           export BUILD_MONTH=$(TZ=UTC-8 date +"%y.%m")
           echo "BUILD_MONTH=$BUILD_MONTH" >> $GITHUB_ENV
-          sanitize_cache_key_part() { printf '%s' "$1" | tr -c 'A-Za-z0-9_.-' '_'; }
-          echo "ADD_CONFIG_FRAGMENTS_KEY=$(sanitize_cache_key_part "$RAW_ADD_CONFIG_FRAGMENTS")" >> $GITHUB_ENV
-          echo "REMOVE_CONFIG_FRAGMENTS_KEY=$(sanitize_cache_key_part "$RAW_REMOVE_CONFIG_FRAGMENTS")" >> $GITHUB_ENV
           export BUILD_SRC=$(awk -F"=" '/REPO_URL/ {print $NF}' "./wrt_core/compilecfg/${{ env.MODEL }}.ini")
           echo "BUILD_SRC=$BUILD_SRC" >> $GITHUB_ENV
 
       - name: Pre Clone
         run: ./wrt_core/pre_clone_action.sh ${{ env.MODEL }}
 
-      - name: Set Cache Key Prefix
-        run: |
-          echo "CACHE_PREFIX=${{ matrix.os }}-${{ env.MODEL }}-${{ hashFiles('**/repo_flag') }}" >> $GITHUB_ENV
-
       - name: Cache Dependencies
         uses: actions/cache@v6.1.0
         with:
           path: |
             ./action_build/.ccache
-            ./action_build/staging_dir
-          key: ${{ env.CACHE_PREFIX }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-${{ env.BUILD_DATE }}
+            ./action_build/staging_dir/host
+            ./action_build/staging_dir/toolchain-*
+          key: openwrt-build-v1-${{ matrix.os }}-${{ hashFiles('repo_flag') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ${{ env.CACHE_PREFIX }}-${{ env.ADD_CONFIG_FRAGMENTS_KEY }}-${{ env.REMOVE_CONFIG_FRAGMENTS_KEY }}-
-            ${{ env.CACHE_PREFIX }}-
+            openwrt-build-v1-${{ matrix.os }}-${{ hashFiles('repo_flag') }}-
 
       - name: Refresh the cache
         run: |
-          if [ -d "./action_build/staging_dir" ]; then
-            find "./action_build/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r dir; do
-                find "$dir" -type f -exec touch {} +
-            done
-          fi
+          for dir in ./action_build/staging_dir/{host,toolchain-*}/stamp; do
+            if [ -d "$dir" ]; then
+              find "$dir" -type f -exec touch {} +
+            fi
+          done
 
       - name: Machine Information (Pre-build)
         run: |
@@ -160,13 +150,8 @@ jobs:
           # 获取内核版本
           echo "KVER=$(grep -oP "^kernel.*" ./firmware/*.manifest | grep -oP "[4-6]\.[0-9]{1,3}\.[0-9]{1,3}")" >> $GITHUB_ENV
 
-      - name: Delete Old Cache
+      - name: Cache Status
         run: |
-          # 获取缓存列表并删除
-          gh cache list --key "${{ env.CACHE_PREFIX }}-" --json key --jq '.[] | .key' | while read -r key; do
-            gh cache delete "$key"
-          done
-          # 输出缓存状态
           echo "========cache status========"
           echo "ccache: $(du -sh ./action_build/.ccache | cut -f 1)"
           echo "staging: $(du -sh ./action_build/staging_dir | cut -f 1)"
