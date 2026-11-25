@@ -367,6 +367,7 @@ add_netdata() { add_luci_app netdata; }; add_netdata
 add_taskplan() { add_apps luci-app-taskplan; }; add_taskplan
 add_uugamebooster() { add_luci_app uugamebooster; }; add_uugamebooster
 add_oxidns() { add_luci_app oxidns; echo "CONFIG_PACKAGE_oxidns-webui=y" >> $config_file; }; add_oxidns
+add_keepalived() { add_apps keepalived luci-app-keepalived-ha; }; add_keepalived
 # add_nikki() { add_luci_app nikki; }; add_nikki
 # add_clashoo() { add_luci_app clashoo; }; add_clashoo
 # add_msd_lite() { add_luci_app msd_lite;  }; add_msd_lite
