@@ -8,6 +8,20 @@ if [[ ${ID:-} != ubuntu || ${VERSION_CODENAME:-} != noble || $(dpkg --print-arch
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+
+# GitHub-hosted ubuntu-24.04 images ship third-party apt repositories
+# (Microsoft prod, Azure CLI, Google Cloud, dotnet). They are not needed for
+# the build and occasionally answer 403, which aborts "apt-get update" with
+# exit code 100 and kills the whole job. Disable them before touching apt.
+for src in /etc/apt/sources.list.d/*microsoft* /etc/apt/sources.list.d/*azure* \
+           /etc/apt/sources.list.d/*google* /etc/apt/sources.list.d/*dotnet*; do
+    [ -e "$src" ] || continue
+    mv -f "$src" "$src.disabled" 2>/dev/null || true
+    echo "Disabled third-party apt source: $src"
+done
+
+# Retry transient mirror/PPA errors instead of failing the build.
+printf 'Acquire::Retries "5";\n' > /etc/apt/apt.conf.d/99-wrt-ci-retries
 printf 'APT::Install-Recommends "false";\n' > /etc/apt/apt.conf.d/99-wrt-ci
 
 if ! command -v curl >/dev/null || ! dpkg-query -W -f='${Status}' ca-certificates 2>/dev/null | grep -q 'install ok installed'; then
